@@ -4,7 +4,8 @@
   "description": "Simple Ajax Priority Queue with the request versioning and aborting",
   "main": "./dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "integration": "webpack-dev-server --hot --inline --config ./webpack/config.integration.js --content-base test/integration",
+    "test": "node_modules/.bin/mocha -c -w test --compilers js:babel-core/register --require babel-polyfill -R progress $(find test -path '*_test*')"
   },
   "author": "Yroo Team",
   "license": "MIT",
