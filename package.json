@@ -1,11 +1,11 @@
 {
   "name": "orderly-js",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.0.1",
+  "description": "Simple Ajax Priority Queue with the request versioning and aborting",
+  "main": "./dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "Yroo Team",
+  "license": "MIT"
 }
