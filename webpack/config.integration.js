@@ -18,10 +18,8 @@ module.exports = {
     loaders: [{
       test: /\.js$/,
       loader: 'babel',
+      includes: ['test/integration'],
       excludes: ['node_modules']
-    }, {
-      test: /\.json$/,
-      loader: "json"
     }]
   },
   devtool: 'cheap-source-map',

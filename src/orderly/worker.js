@@ -1,40 +1,46 @@
-let increment = (int) => {
-  return int + 1
-}
+import Job from './job'
 
-let decrement = (int) => {
-  return int - 1
-}
+class Worker {
+  constructor(queue, { sleep = 50, max = 8 } = {}) {
+    this.queue = queue
+    this.sleep = sleep
+    this.max = max
+    this.pending = 0
 
-let start = (queue, options) => {
-  let { sleep, max } = __defaults__(options)
-  return setInterval(__run__(queue, max), sleep)
-}
+    this.start()
+  }
 
-let stop = (worker) => {
-  return clearInterval(worker)
-}
+  start = () => {
+    while (this.available && this.hasJob) {
+      this.pending += 1
 
-let __defaults__ = (options = {}) => {
-  return { sleep: 50, max: 8, ...options}
-}
-
-let __run__ = (queue, max) => {
-  let pending = 0
-
-  return () => {
-    while (pending < max && !queue.isEmpty()) {
-      pending = increment(pending)
-
-      let job = queue.get()
-      let q = job.run()
-
-      q.then(() => {
-        pending = decrement(pending)
-      })
+      let job = this.queue.get()
+      this.dispatch(this.execute, job)
     }
-    queue.cleanup()
+
+    this.queue.cleanup()
+    setTimeout(this.start, this.sleep)
+  }
+
+  dispatch(func, job) {
+    return setTimeout(func, 0, job, this.complete)
+  }
+
+  execute = (job) => {
+    return Job.invoke(job, this.complete)
+  }
+
+  complete = () => {
+    this.pending -= 1
+  }
+
+  get available() {
+    return this.pending < this.max
+  }
+
+  get hasJob() {
+    return !this.queue.isEmpty()
   }
 }
 
-export default { start, stop }
+export default Worker

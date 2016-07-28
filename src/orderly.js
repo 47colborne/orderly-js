@@ -1,109 +1,115 @@
-import AsyncJob from './orderly/async_job'
+import Job from './orderly/job'
 import Queue from './orderly/queue'
 import Worker from './orderly/worker'
-import versioning from './orderly/versioning'
+import VersionTracker from './orderly/version_tracker'
 
-export default function(options = {}) {
+function Orderly(config = {}) {
 
-  // initialize options
-  let defaultOptions = { maxConcurrent: 8 }
-  options = { ...defaultOptions, ...options }
-
+  // ============================================
   // initialize environment
+  // ============================================
+
   let queue = new Queue
-  let worker = Worker.start(queue, {})
+  let worker = new Worker(queue, config)
+  let versioning = new VersionTracker
 
+  // ============================================
+  // Private Functions
+  // ============================================
 
-  // let worker = new Worker(queue, { })
-  let versions = versioning.build()
-
-  // Internal Functions
-  let filterSearchParams = function(url) {
+  function filterSearchParams(url) {
     return `${ url }`.replace(/\?.*$/, '')
   }
 
-  let buildAbort = function(abort) {
+  function buildAbort(abort) {
     if (abort) return abort
   }
 
-  let buildVersion = function({ url, version = true }) {
+  function buildVersion(url, version) {
+    if (version === undefined) version = true
+
     if (version) {
-      let type = filterSearchParams(url)
-      let next = versioning.inc(versions, type)
-      versions = versioning.set(versions, type, next)
-      return () => versioning.get(versions, type) === next
+      let key = filterSearchParams(url)
+      let next = versioning.inc(key)
+
+      return () => versioning.get(key) === next
     }
   }
 
-  let buildCancel = function(abort, version) {
+  function buildCancel(abort, url, version) {
     abort = buildAbort(abort)
-    version = buildVersion(version)
-    return () => (abort && abort()) || (version && !version())
+    version = buildVersion(url, version)
+    return () => (version && !version()) || (abort && abort())
   }
 
-  let isGoodRequest = function({ status }) {
+  function isGoodRequest({ status }) {
     return status >= 200 && status < 400
   }
 
-  let buildJob = function(action, priority) {
-    return new AsyncJob({ action, priority })
+  function buildJob(action, priority) {
+    return new Job({ action, priority })
   }
 
-  let responseStatus = function(reject) {
+  function responseStatus(reject) {
     return (resp) => isGoodRequest(resp) ? resp : reject(resp)
   }
 
-  let responseType = function(type = 'text') {
-    return async (resp) => ({ ...resp, body: await resp[type]() })
+  function responseType(type = 'text') {
+    return async (resp) => {
+      let body = await resp[type]()
+      return { ...resp, body }
+    }
   }
 
-  let responseCancelled = function(cancel, reject) {
+  function shouldCancel(cancel, reject) {
     return (resp) => cancel() ? reject({ ...resp, cancelled: true }) : resp
   }
 
-  let buildAction = function(url, { abort, type, version, ...options }, resolve, reject) {
+  function buildAction(url, options, resolve, reject) {
+    let { abort, type, version } = options
     return () => {
       return fetch(url, options)
         .then(responseStatus(reject))
-        .then(responseCancelled(buildCancel(abort, url, version), reject))
+        .then(shouldCancel(buildCancel(abort, url, version), reject))
         .then(responseType(type))
         .then(resolve)
         .catch(reject)
     }
   }
 
-  // Public Interface
+  // ============================================
+  // Public Functions
+  // ============================================
 
-  class Orderly {
-    ajax(url, { priority, ...options }) {
-      return new Promise((resolve, reject) => {
-        queue.add(
-          buildJob(
-            buildAction(url, options, resolve, reject),
-            priority
-          )
+  function ajax(url, options = {}) {
+    let { priority } = options
+    return new Promise((resolve, reject) => {
+      queue.add(
+        buildJob(
+          buildAction(url, options, resolve, reject),
+          priority
         )
-      })
-    }
-
-    get(url, options = {}) {
-      return this.ajax(url, { ...options, method: 'GET' })
-    }
-
-    post(url, options = {}) {
-      return this.ajax(url, { ...options, method: 'POST' })
-    }
-
-    put(url, options = {}) {
-      return this.ajax(url, { ...options, method: 'PUT' })
-    }
-
-    delete(url, options = {}) {
-      return this.ajax(url, { ...options, method: 'DELETE' })
-    }
+      )
+    })
   }
 
-  return new Orderly()
+  function get(url, options = {}) {
+    return ajax(url, { ...options, method: 'GET' })
+  }
+
+  function post(url, options = {}) {
+    return ajax(url, { ...options, method: 'POST' })
+  }
+
+  function put(url, options = {}) {
+    return ajax(url, { ...options, method: 'PUT' })
+  }
+
+  function del(url, options = {}) {
+    return ajax(url, { ...options, method: 'DELETE' })
+  }
+
+  return { ajax, get, post, put, del, versioning, queue, worker }
 }
 
-
+export default Orderly

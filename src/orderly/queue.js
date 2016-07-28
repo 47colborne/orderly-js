@@ -1,13 +1,15 @@
 import FastPriorityQueue from 'fastpriorityqueue'
+import Job from './job'
 
 class Queue {
-  constructor(options = {}) {
-    let { strategy = this.__defaultStrategy__ } = options
+  constructor({ strategy = this.__defaultStrategy__ } = {}) {
     this.q = new FastPriorityQueue(strategy)
   }
 
-  add(job) {
-    if (typeof job === 'object') return this.q.add(job)
+  add(obj) {
+    console.info('Orderly.Job.Added')
+    if (typeof obj === 'object' && obj.hasOwnProperty('action'))
+      return this.q.add(obj)
   }
 
   get() {
