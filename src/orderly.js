@@ -5,11 +5,12 @@ import VersionTracker from './orderly/version_tracker'
 
 function Orderly(config = {}) {
 
+
   // ============================================
   // initialize environment
   // ============================================
 
-  let queue = new Queue
+  let queue = new Queue({ debug: config.debug })
   let worker = new Worker(queue, config)
   let versioning = new VersionTracker
 

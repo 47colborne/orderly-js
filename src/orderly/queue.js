@@ -2,17 +2,19 @@ import FastPriorityQueue from 'fastpriorityqueue'
 import Job from './job'
 
 class Queue {
-  constructor({ strategy = this.__defaultStrategy__ } = {}) {
+  constructor({ strategy = this.__defaultStrategy__, debug } = {}) {
     this.q = new FastPriorityQueue(strategy)
+    this.debug = debug
   }
 
   add(obj) {
-    console.info('Orderly.Job.Added')
-    if (typeof obj === 'object' && obj.hasOwnProperty('action'))
+    if (typeof obj === 'object' && obj.hasOwnProperty('action')) {
       return this.q.add(obj)
+    }
   }
 
   get() {
+    if (this.debug) console.info('Orderly.Queue size: ', this.size())
     return this.q.poll()
   }
 

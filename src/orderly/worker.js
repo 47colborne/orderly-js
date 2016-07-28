@@ -13,7 +13,6 @@ class Worker {
   start = () => {
     while (this.available && this.hasJob) {
       this.pending += 1
-
       let job = this.queue.get()
       this.dispatch(this.execute, job)
     }
