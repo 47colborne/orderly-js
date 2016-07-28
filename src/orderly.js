@@ -4,13 +4,13 @@ import Worker from './orderly/worker'
 import VersionTracker from './orderly/version_tracker'
 
 function Orderly(config = {}) {
-
+  Job.debug = Queue.debug = Worker.debug = config.debug
 
   // ============================================
   // initialize environment
   // ============================================
 
-  let queue = new Queue({ debug: config.debug })
+  let queue = new Queue
   let worker = new Worker(queue, config)
   let versioning = new VersionTracker
 

@@ -14,7 +14,7 @@ class Queue {
   }
 
   get() {
-    if (this.debug) console.info('Orderly.Queue size: ', this.size())
+    if (Queue.debug) console.info('Orderly.Queue size: ', this.size())
     return this.q.poll()
   }
 

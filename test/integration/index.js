@@ -1,6 +1,6 @@
 import Orderly from '../../dist'
 
-let o = Orderly()
+let o = Orderly({ debug: true })
 
 function randomPriority() {
   return Math.floor(Math.random() * 10)
