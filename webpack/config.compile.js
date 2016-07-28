@@ -24,5 +24,9 @@ module.exports = {
       includes: ['src'],
       excludes: ['node_modules']
     }]
-  }
+  },
+  devtool: 'source-map',
+  plugins: [
+    new webpack.optimize.UglifyJsPlugin({ minimize: true })
+  ]
 }
