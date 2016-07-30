@@ -1,6 +1,7 @@
+import fetch from 'whatwg-fetch'
 import Orderly from '../../dist'
 
-let o = Orderly({ debug: true })
+let o = Orderly({  })
 
 function randomPriority() {
   return Math.floor(Math.random() * 10)
@@ -25,30 +26,30 @@ setTimeout(() => {
         type: 'json',
         priority: priority
       })
-       .then(resp => console.log('complete', o.versioning.map))
-       .catch(err => console.log(err))
+       .then(resp => console.log('complete'))
+       .catch(err => {})
     }, randomTimeout())
 
   })
 
 }, randomTimeout())
 
-setTimeout(() => {
-  randomPriorities.forEach((priority, index) => {
-    setTimeout(() => {
+// setTimeout(() => {
+//   randomPriorities.forEach((priority, index) => {
+//     setTimeout(() => {
 
-      o.get('https://api.github.com/users', {
-        type: 'json',
-        version: true
-      })
-       .then(resp => console.log('complete', o.versioning.map))
-       .catch(err => console.log(err))
+//       o.get('https://api.github.com/users', {
+//         type: 'json',
+//         version: true
+//       })
+//        .then(resp => console.log('complete', o.versioning.map))
+//        .catch(err => console.log(err))
 
-    }, randomTimeout(0, 2000))
+//     }, randomTimeout(0, 2000))
 
-  })
+//   })
 
-}, randomTimeout())
+// }, randomTimeout())
 
 
 // VERSIONED CASE

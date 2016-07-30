@@ -1,9 +1,15 @@
+import Ajax from './orderly/ajax'
 import Job from './orderly/job'
 import Queue from './orderly/queue'
 import Worker from './orderly/worker'
 import VersionTracker from './orderly/version_tracker'
 
 function Orderly(config = {}) {
+
+  // ============================================
+  // debug mode
+  // ============================================
+
   Job.debug = Queue.debug = Worker.debug = config.debug
 
   // ============================================
@@ -18,41 +24,68 @@ function Orderly(config = {}) {
   // Private Functions
   // ============================================
 
-  function filterSearchParams(url) {
-    return `${ url }`.replace(/\?.*$/, '')
+  // filter out url params from the url
+  // example:
+  //   input: http://www.yroo.com/products/123?country=ca
+  //   output: http://www.yroo.com/products/123
+  // ============================================
+
+  let urlParamFormat = new RegExp(/\?.*$/);
+
+  function filterUrlParams(url) {
+    return url.toString().replace(urlParamFormat, '')
   }
 
-  function buildAbort(abort) {
-    if (abort) return abort
+  // filter abort condition
+  // ============================================
+
+  function filterAbort(abort) {
+    if (abort && typeof abort === 'function') return abort
   }
+
+  // build version validation
+  // ============================================
 
   function buildVersion(url, version) {
-    if (version === undefined) version = true
-
-    if (version) {
-      let key = filterSearchParams(url)
+    if (version !== false) {
+      let key = filterUrlParams(url)
       let next = versioning.inc(key)
 
       return () => versioning.get(key) === next
     }
   }
 
+  // build cancel condition
+  // request should cancel if version is outdated
+  // or abort condition returns true
+  // ============================================
+
   function buildCancel(abort, url, version) {
-    abort = buildAbort(abort)
+    abort = filterAbort(abort)
     version = buildVersion(url, version)
-    return () => (version && !version()) || (abort && abort())
+    return () => (
+      (version && !version()) ||
+      (abort && abort())
+    )
   }
 
-  function isGoodRequest({ status }) {
-    return status >= 200 && status < 400
+  // check if request is success
+  // ============================================
+
+  function isBadRequest({ status }) {
+    return status >= 400
   }
+
+  // returns a new job given action callback
+  // and priority
+  // ============================================
 
   function buildJob(action, priority) {
     return new Job({ action, priority })
   }
 
-  function responseStatus(reject) {
-    return (resp) => isGoodRequest(resp) ? resp : reject(resp)
+  function rejectBadRequest(reject) {
+    return (resp) => isBadRequest(resp) ? reject(resp) : resp
   }
 
   function responseType(type = 'text') {
@@ -70,7 +103,7 @@ function Orderly(config = {}) {
     let { abort, type, version } = options
     return () => {
       return fetch(url, options)
-        .then(responseStatus(reject))
+        .then(rejectBadRequest(reject))
         .then(shouldCancel(buildCancel(abort, url, version), reject))
         .then(responseType(type))
         .then(resolve)
@@ -84,6 +117,12 @@ function Orderly(config = {}) {
 
   function ajax(url, options = {}) {
     let { priority } = options
+    let req = new Ajax(url, options)
+      .success(resp => resp.comment = "I rock" )
+      .then(resp => console.log('comment', resp.comment))
+      .then(resp => console.log('t', resp))
+      .fail((resp) => console.log('f', resp))
+
     return new Promise((resolve, reject) => {
       queue.add(
         buildJob(
