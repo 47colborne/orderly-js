@@ -1,5 +1,4 @@
 import FastPriorityQueue from 'fastpriorityqueue'
-import Job from './job'
 
 class Queue {
   constructor({ strategy = this.__defaultStrategy__, debug } = {}) {
@@ -14,7 +13,8 @@ class Queue {
   }
 
   get() {
-    if (Queue.debug) console.info('Orderly.Queue size: ', this.size())
+    if (Queue.debug)
+      console.info('Orderly.Queue.get, current size: ', this.size())
     return this.q.poll()
   }
 

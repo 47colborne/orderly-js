@@ -1,7 +1,7 @@
 import fetch from 'whatwg-fetch'
 import Orderly from '../../dist'
 
-let o = Orderly({  })
+let o = Orderly({ debug: true })
 
 function randomPriority() {
   return Math.floor(Math.random() * 10)
@@ -25,9 +25,12 @@ setTimeout(() => {
       o.get('https://api.github.com/users', {
         type: 'json',
         priority: priority
+        // version: false
       })
-       .then(resp => console.log('complete'))
-       .catch(err => {})
+       // .cancel(resp => resp ? true : false)
+       .then(resp => console.log('complete', resp))
+       .catch(err => console.log('ERROR!!!', err))
+
     }, randomTimeout())
 
   })

@@ -5,15 +5,23 @@ class VersionTracker {
   }
 
   get(key) {
-    return this.map[key] || this.initValue
+    return this.map[key] || (this.map[key] = { counter: 0, current: 0 })
   }
 
-  set(key, value) {
-    return this.map[key] = value
+  getCounter(key) {
+    return this.get(key).counter
+  }
+
+  getCurrent(key) {
+    return this.get(key).current
+  }
+
+  setCurrent(key, val) {
+    return this.get(key).current = val
   }
 
   inc(key) {
-    return this.set(key, this.get(key) + 1)
+    return (this.map[key] || (this.map[key] = this.get(key))).counter += 1
   }
 }
 

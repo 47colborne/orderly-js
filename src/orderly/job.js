@@ -3,7 +3,10 @@ class Job {
 
   static invoke(job, callback) {
     if (this.debug) this.log(job, 'Invoking')
-    let q = job.action()
+
+    let q = new Promise(async (resolve, reject) => {
+      let result = resolve(await job.action())
+    })
 
     if (callback && typeof callback === 'function')
       q.then(callback)

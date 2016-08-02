@@ -1,8 +1,8 @@
-import Ajax from './orderly/ajax'
+import AjaxRequest from './orderly/ajax_request'
 import Job from './orderly/job'
 import Queue from './orderly/queue'
 import Worker from './orderly/worker'
-import VersionTracker from './orderly/version_tracker'
+
 
 function Orderly(config = {}) {
 
@@ -10,7 +10,7 @@ function Orderly(config = {}) {
   // debug mode
   // ============================================
 
-  Job.debug = Queue.debug = Worker.debug = config.debug
+  AjaxRequest.debug = Job.debug = Queue.debug = Worker.debug = config.debug
 
   // ============================================
   // initialize environment
@@ -18,7 +18,6 @@ function Orderly(config = {}) {
 
   let queue = new Queue
   let worker = new Worker(queue, config)
-  let versioning = new VersionTracker
 
   // ============================================
   // Private Functions
@@ -30,11 +29,7 @@ function Orderly(config = {}) {
   //   output: http://www.yroo.com/products/123
   // ============================================
 
-  let urlParamFormat = new RegExp(/\?.*$/);
 
-  function filterUrlParams(url) {
-    return url.toString().replace(urlParamFormat, '')
-  }
 
   // filter abort condition
   // ============================================
@@ -46,14 +41,7 @@ function Orderly(config = {}) {
   // build version validation
   // ============================================
 
-  function buildVersion(url, version) {
-    if (version !== false) {
-      let key = filterUrlParams(url)
-      let next = versioning.inc(key)
 
-      return () => versioning.get(key) === next
-    }
-  }
 
   // build cancel condition
   // request should cancel if version is outdated
@@ -99,38 +87,18 @@ function Orderly(config = {}) {
     return (resp) => cancel() ? reject({ ...resp, cancelled: true }) : resp
   }
 
-  function buildAction(url, options, resolve, reject) {
-    let { abort, type, version } = options
-    return () => {
-      return fetch(url, options)
-        .then(rejectBadRequest(reject))
-        .then(shouldCancel(buildCancel(abort, url, version), reject))
-        .then(responseType(type))
-        .then(resolve)
-        .catch(reject)
-    }
-  }
-
   // ============================================
   // Public Functions
   // ============================================
 
   function ajax(url, options = {}) {
     let { priority } = options
-    let req = new Ajax(url, options)
-      .success(resp => resp.comment = "I rock" )
-      .then(resp => console.log('comment', resp.comment))
-      .then(resp => console.log('t', resp))
-      .fail((resp) => console.log('f', resp))
+    let req = new AjaxRequest(url, options)
+    let job = buildJob(req.execute, priority)
 
-    return new Promise((resolve, reject) => {
-      queue.add(
-        buildJob(
-          buildAction(url, options, resolve, reject),
-          priority
-        )
-      )
-    })
+    queue.add(job)
+
+    return req.catch(err => console.log("ERROR", err))
   }
 
   function get(url, options = {}) {
@@ -149,7 +117,7 @@ function Orderly(config = {}) {
     return ajax(url, { ...options, method: 'DELETE' })
   }
 
-  return { ajax, get, post, put, del, versioning, queue, worker }
+  return { ajax, get, post, put, del, queue, worker }
 }
 
 export default Orderly

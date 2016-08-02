@@ -11,6 +11,7 @@ class Worker {
   }
 
   start = () => {
+
     while (this.available && this.hasJob) {
       this.pending += 1
       let job = this.queue.get()
@@ -22,7 +23,7 @@ class Worker {
   }
 
   dispatch(func, job) {
-    return setTimeout(func, 0, job, this.complete)
+    return setTimeout(func, 0, job)
   }
 
   execute = (job) => {

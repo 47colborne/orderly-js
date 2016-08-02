@@ -7,7 +7,7 @@
     "integration": "webpack-dev-server --hot --inline --config ./webpack/config.integration.js --content-base ./test/integration",
     "test": "node_modules/.bin/mocha -c -w test --compilers js:babel-core/register --require babel-polyfill -R progress $(find test -path '*_test*')",
     "watch": "webpack --watch --color --progress --config ./webpack/config.compile.js",
-    "compile": "webpack --config ./webpack/config.compile.js"
+    "compile": "NODE_ENV=compile webpack --config ./webpack/config.compile.js"
   },
   "author": "Yroo Team",
   "license": "MIT",
