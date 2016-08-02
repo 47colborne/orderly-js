@@ -1,27 +1,14 @@
 import VersionTracker from './version_tracker'
 
+import { buildCallback, onCatch, onFail, onSuccess } from './request/callbacks'
+import { parseContentType, requestContentType } from './request/content_type'
+
 const VERSIONS = new VersionTracker()
 
 const URL_PARAMS_FORMAT = new RegExp(/\?.*$/);
 
 function filterUrlParams(url) {
   return url.toString().replace(URL_PARAMS_FORMAT, '')
-}
-
-function contextTypeIsJSON(resp) {
-  return resp._bodyBlob.type.includes('application/json')
-}
-
-function parseContentType(type) {
-  return async function(resp) {
-    if (type) {
-      resp.data = await resp[type]()
-    } else if (contextTypeIsJSON(resp)) {
-      resp.data = await resp.json()
-    }
-
-    return resp
-  }
 }
 
 function shouldSkip(cancelConditions) {
@@ -36,35 +23,6 @@ function shouldContinue(id, cancelConditions, reject) {
 
     return resp
   }
-}
-
-function buildCallback(callback, condition) {
-  return function(resp) {
-    if (condition(resp)) {
-      resp = callback(resp)
-    }
-
-    return resp
-  }
-}
-
-function onCatch(callback, cancelConditions) {
-  return callback
-}
-
-function onFail(callback, cancelConditions) {
-  return buildCallback(callback, (resp) => resp.status >= 400)
-}
-
-function onSuccess(callback, cancelConditions) {
-  return buildCallback(callback, (resp) => resp.status < 400)
-}
-
-function requestContentType(type) {
-  return type ? {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  } : {}
 }
 
 function buildHeaders({ headers = {}, type }) {

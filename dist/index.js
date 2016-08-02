@@ -278,42 +278,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Job = function () {
 	  _createClass(Job, null, [{
 	    key: 'invoke',
-	    value: function invoke(job, callback) {
-	      var _this = this;
+	    value: function () {
+	      var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(job, callback) {
+	        var result;
+	        return regeneratorRuntime.wrap(function _callee$(_context) {
+	          while (1) {
+	            switch (_context.prev = _context.next) {
+	              case 0:
+	                if (this.debug) this.log(job, 'Invoking');
 	
-	      if (this.debug) this.log(job, 'Invoking');
+	                _context.next = 3;
+	                return job.action();
 	
-	      var q = new Promise(function () {
-	        var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(resolve, reject) {
-	          var result;
-	          return regeneratorRuntime.wrap(function _callee$(_context) {
-	            while (1) {
-	              switch (_context.prev = _context.next) {
-	                case 0:
-	                  _context.next = 2;
-	                  return job.action();
+	              case 3:
+	                result = _context.sent;
 	
-	                case 2:
-	                  _context.t0 = _context.sent;
-	                  result = resolve(_context.t0);
 	
-	                case 4:
-	                case 'end':
-	                  return _context.stop();
-	              }
+	                if (callback && typeof callback === 'function') result = callback(result);
+	
+	                return _context.abrupt('return', result);
+	
+	              case 6:
+	              case 'end':
+	                return _context.stop();
 	            }
-	          }, _callee, _this);
-	        }));
+	          }
+	        }, _callee, this);
+	      }));
 	
-	        return function (_x, _x2) {
-	          return _ref.apply(this, arguments);
-	        };
-	      }());
+	      function invoke(_x, _x2) {
+	        return _ref.apply(this, arguments);
+	      }
 	
-	      if (callback && typeof callback === 'function') q.then(callback);
-	
-	      return q;
-	    }
+	      return invoke;
+	    }()
 	  }, {
 	    key: 'log',
 	    value: function log(job, action) {
@@ -768,11 +766,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _version_tracker2 = _interopRequireDefault(_version_tracker);
 	
+	var _callbacks = __webpack_require__(11);
+	
+	var _content_type = __webpack_require__(12);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 	
 	var VERSIONS = new _version_tracker2.default();
 	
@@ -780,59 +780,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function filterUrlParams(url) {
 	  return url.toString().replace(URL_PARAMS_FORMAT, '');
-	}
-	
-	function contextTypeIsJSON(resp) {
-	  return resp._bodyBlob.type.includes('application/json');
-	}
-	
-	function parseContentType(type) {
-	  return function () {
-	    var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(resp) {
-	      return regeneratorRuntime.wrap(function _callee$(_context) {
-	        while (1) {
-	          switch (_context.prev = _context.next) {
-	            case 0:
-	              if (!type) {
-	                _context.next = 6;
-	                break;
-	              }
-	
-	              _context.next = 3;
-	              return resp[type]();
-	
-	            case 3:
-	              resp.data = _context.sent;
-	              _context.next = 10;
-	              break;
-	
-	            case 6:
-	              if (!contextTypeIsJSON(resp)) {
-	                _context.next = 10;
-	                break;
-	              }
-	
-	              _context.next = 9;
-	              return resp.json();
-	
-	            case 9:
-	              resp.data = _context.sent;
-	
-	            case 10:
-	              return _context.abrupt('return', resp);
-	
-	            case 11:
-	            case 'end':
-	              return _context.stop();
-	          }
-	        }
-	      }, _callee, this);
-	    }));
-	
-	    return function (_x) {
-	      return _ref.apply(this, arguments);
-	    };
-	  }();
 	}
 	
 	function shouldSkip(cancelConditions) {
@@ -853,50 +800,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	}
 	
-	function buildCallback(callback, condition) {
-	  return function (resp) {
-	    if (condition(resp)) {
-	      resp = callback(resp);
-	    }
+	function buildHeaders(_ref) {
+	  var _ref$headers = _ref.headers;
+	  var headers = _ref$headers === undefined ? {} : _ref$headers;
+	  var type = _ref.type;
 	
-	    return resp;
-	  };
+	  return new Headers(Object.assign(headers, (0, _content_type.requestContentType)(type)));
 	}
 	
-	function onCatch(callback, cancelConditions) {
-	  return callback;
-	}
-	
-	function onFail(callback, cancelConditions) {
-	  return buildCallback(callback, function (resp) {
-	    return resp.status >= 400;
-	  });
-	}
-	
-	function onSuccess(callback, cancelConditions) {
-	  return buildCallback(callback, function (resp) {
-	    return resp.status < 400;
-	  });
-	}
-	
-	function requestContentType(type) {
-	  return type ? {
-	    'Accept': 'application/json',
-	    'Content-Type': 'application/json'
-	  } : {};
-	}
-	
-	function buildHeaders(_ref2) {
-	  var _ref2$headers = _ref2.headers;
-	  var headers = _ref2$headers === undefined ? {} : _ref2$headers;
+	function buildBody(_ref2) {
+	  var body = _ref2.body;
 	  var type = _ref2.type;
-	
-	  return new Headers(Object.assign(headers, requestContentType(type)));
-	}
-	
-	function buildBody(_ref3) {
-	  var body = _ref3.body;
-	  var type = _ref3.type;
 	
 	  return body ? type === 'json' ? JSON.stringify(body) : body : "";
 	}
@@ -916,8 +830,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return new Request(url, config);
 	}
 	
-	function buildDelayedAction(key, id, request, _ref4, cancelConditions) {
-	  var type = _ref4.type;
+	function buildDelayedAction(key, id, request, _ref3, cancelConditions) {
+	  var type = _ref3.type;
 	
 	  return function (resolve, reject) {
 	    return function () {
@@ -926,7 +840,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      } else {
 	        VERSIONS.setCurrent(key, id);
 	
-	        return fetch(request).then(shouldContinue(id, cancelConditions, reject)).then(parseContentType(type)).then(resolve).catch(reject);
+	        return fetch(request).then(shouldContinue(id, cancelConditions, reject)).then((0, _content_type.parseContentType)(type)).then(resolve).catch(reject);
 	      }
 	    };
 	  };
@@ -975,12 +889,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'fail',
 	    value: function fail(callback) {
-	      return this.then(onFail(callback));
+	      return this.then((0, _callbacks.onFail)(callback));
 	    }
 	  }, {
 	    key: 'success',
 	    value: function success(callback) {
-	      return this.then(onSuccess(callback));
+	      return this.then((0, _callbacks.onSuccess)(callback));
 	    }
 	  }, {
 	    key: 'then',
@@ -994,6 +908,122 @@ return /******/ (function(modules) { // webpackBootstrap
 	}();
 	
 	exports.default = AjaxRequest;
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	function buildCallback(callback, condition) {
+	  return function (resp) {
+	    if (condition(resp)) {
+	      resp = callback(resp);
+	    }
+	
+	    return resp;
+	  };
+	}
+	
+	function onCatch(callback, cancelConditions) {
+	  return callback;
+	}
+	
+	function onFail(callback, cancelConditions) {
+	  return buildCallback(callback, function (resp) {
+	    return resp.status >= 400;
+	  });
+	}
+	
+	function onSuccess(callback, cancelConditions) {
+	  return buildCallback(callback, function (resp) {
+	    return resp.status < 400;
+	  });
+	}
+	
+	exports.buildCallback = buildCallback;
+	exports.onCatch = onCatch;
+	exports.onFail = onFail;
+	exports.onSuccess = onSuccess;
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+	
+	function bodyContainsJson(resp) {
+	  return resp._bodyBlob.type.includes('application/json');
+	}
+	
+	function parseContentType(type) {
+	  return function () {
+	    var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(resp) {
+	      return regeneratorRuntime.wrap(function _callee$(_context) {
+	        while (1) {
+	          switch (_context.prev = _context.next) {
+	            case 0:
+	              if (!type) {
+	                _context.next = 6;
+	                break;
+	              }
+	
+	              _context.next = 3;
+	              return resp[type]();
+	
+	            case 3:
+	              resp.data = _context.sent;
+	              _context.next = 10;
+	              break;
+	
+	            case 6:
+	              if (!bodyContainsJson(resp)) {
+	                _context.next = 10;
+	                break;
+	              }
+	
+	              _context.next = 9;
+	              return resp.json();
+	
+	            case 9:
+	              resp.data = _context.sent;
+	
+	            case 10:
+	              return _context.abrupt('return', resp);
+	
+	            case 11:
+	            case 'end':
+	              return _context.stop();
+	          }
+	        }
+	      }, _callee, this);
+	    }));
+	
+	    return function (_x) {
+	      return _ref.apply(this, arguments);
+	    };
+	  }();
+	}
+	
+	function requestContentType(type) {
+	  return type ? {
+	    'Accept': 'application/json',
+	    'Content-Type': 'application/json'
+	  } : {};
+	}
+	
+	exports.bodyContainsJson = bodyContainsJson;
+	exports.parseContentType = parseContentType;
+	exports.requestContentType = requestContentType;
 
 /***/ }
 /******/ ])

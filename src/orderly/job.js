@@ -1,17 +1,15 @@
 class Job {
   static counter = 0
 
-  static invoke(job, callback) {
+  static async invoke(job, callback) {
     if (this.debug) this.log(job, 'Invoking')
 
-    let q = new Promise(async (resolve, reject) => {
-      let result = resolve(await job.action())
-    })
+    let result = await job.action()
 
     if (callback && typeof callback === 'function')
-      q.then(callback)
+      result = callback(result)
 
-    return q
+    return result
   }
 
   static log(job, action) {
