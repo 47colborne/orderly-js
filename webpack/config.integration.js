@@ -6,25 +6,25 @@ let webpack = require('webpack')
 const PATH = (p) => path.resolve(__dirname, '..', p || '')
 
 module.exports = {
-  context: PATH('test/integration'),
+  context: PATH('integration'),
   entry: {
     index: ['babel-polyfill', './index.js']
   },
   output: {
     filename: 'bundle.js',
-    path: PATH('test/integration')
+    path: PATH('integration')
   },
   module: {
     loaders: [{
       test: /\.js$/,
       loader: 'babel',
-      includes: ['test/integration'],
+      includes: ['integration'],
       excludes: ['node_modules']
     }]
   },
   devtool: 'cheap-source-map',
   devServer: {
-    contentBase: PATH('test/integration'),
+    contentBase: PATH('integration'),
     hot: true,
     inline: true,
     stats: 'error-only'

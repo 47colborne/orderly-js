@@ -8,10 +8,6 @@ function buildCallback(callback, condition) {
   }
 }
 
-function onCatch(callback, cancelConditions) {
-  return callback
-}
-
 function onFail(callback, cancelConditions) {
   return buildCallback(callback, (resp) => resp.status >= 400)
 }
@@ -20,4 +16,4 @@ function onSuccess(callback, cancelConditions) {
   return buildCallback(callback, (resp) => resp.status < 400)
 }
 
-export { buildCallback, onCatch, onFail, onSuccess }
+export default { buildCallback, onFail, onSuccess }

@@ -1,37 +1,37 @@
 import FastPriorityQueue from 'fastpriorityqueue'
 import { log } from '../debug'
 
+function defaultStrategy({ priority: x }, { priority: y }) {
+  return x !== undefined && x > y
+}
+
 class Queue {
-  constructor({ strategy = this.__defaultStrategy__, debug } = {}) {
-    this.q = new FastPriorityQueue(strategy)
+  constructor({ strategy = defaultStrategy, debug } = {}) {
+    this.queue = new FastPriorityQueue(strategy)
     this.debug = debug
   }
 
   add(obj) {
-    if (typeof obj === 'object' && obj.hasOwnProperty('action')) {
-      return this.q.add(obj)
+    if (typeof obj === 'object' && typeof obj.action === 'function') {
+      return this.queue.add(obj)
     }
   }
 
   get() {
-    log('Queue', 'get', `size: ${ this.size() }`)
-    return this.q.poll()
+    log('Queue', 'get', `size: ${ this.size }`)
+    return this.queue.poll()
   }
 
   isEmpty() {
-    return this.q.isEmpty()
+    return this.queue.isEmpty()
   }
 
-  size() {
-    return this.q.size
+  get size() {
+    return this.queue.size
   }
 
   cleanup() {
-    return this.q.trim()
-  }
-
-  __defaultStrategy__({ priority: x }, { priority: y }) {
-    return x !== undefined && x > y
+    return this.queue.trim()
   }
 }
 

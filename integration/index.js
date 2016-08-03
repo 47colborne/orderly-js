@@ -1,5 +1,5 @@
 import fetch from 'whatwg-fetch'
-import Orderly from '../../dist'
+import Orderly from '../dist'
 
 let o = Orderly({ debug: true })
 
@@ -19,40 +19,40 @@ let randomPriorities = new Array(100)
 // BASIC CASE
 // ==============================================
 
-setTimeout(() => {
-  randomPriorities.forEach((priority, index) => {
-    setTimeout(() => {
-      o.get('https://api.github.com/users', {
-        type: 'json',
-        priority: priority
-        // version: false
-      })
-       // .cancel(resp => resp ? true : false)
-       .then(resp => console.log('complete', resp))
-       .catch(err => console.log('ERROR!!!', err))
-
-    }, randomTimeout())
-
-  })
-
-}, randomTimeout())
-
 // setTimeout(() => {
 //   randomPriorities.forEach((priority, index) => {
 //     setTimeout(() => {
-
 //       o.get('https://api.github.com/users', {
 //         type: 'json',
-//         version: true
+//         priority: priority
+//         // version: false
 //       })
-//        .then(resp => console.log('complete', o.versioning.map))
-//        .catch(err => console.log(err))
+//        .cancel(resp => false)
+//        .then(resp => console.log('complete', resp.version))
+//        .catch(err => console.log('ERROR!!!', err))
 
-//     }, randomTimeout(0, 2000))
+//     }, randomTimeout())
 
 //   })
 
 // }, randomTimeout())
+
+setTimeout(() => {
+  randomPriorities.forEach((priority, index) => {
+    setTimeout(() => {
+
+      o.get('https://api.github.com/users', {
+        type: 'json'
+      })
+       .cancel(resp => false)
+       .then(resp => console.log('complete', resp.version))
+       .catch(err => console.log('ERROR!!!', err))
+
+    }, randomTimeout(0, 2000))
+
+  })
+
+}, randomTimeout())
 
 
 // VERSIONED CASE
@@ -97,3 +97,4 @@ setTimeout(() => {
 //   })
 
 // }, randomTimeout())
+

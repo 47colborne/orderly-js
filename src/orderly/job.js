@@ -6,11 +6,11 @@ class Job {
     this.priority = priority
     this.options = options
 
-    log('Job', 'constructed', this.priority, this.options)
+    log('Job', 'constructed', this)
   }
 
   async execute(callback) {
-    log('Job', 'executing', this.priority, this.options)
+    log('Job', 'executing', this)
 
     let result = await this.action()
     if (callback && typeof callback === 'function') {

@@ -79,19 +79,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _debug = __webpack_require__(3);
 	
-	var _request = __webpack_require__(4);
+	var _ajax = __webpack_require__(4);
 	
-	var _request2 = _interopRequireDefault(_request);
+	var _ajax2 = _interopRequireDefault(_ajax);
 	
-	var _job = __webpack_require__(10);
+	var _job = __webpack_require__(9);
 	
 	var _job2 = _interopRequireDefault(_job);
 	
-	var _queue = __webpack_require__(11);
+	var _queue = __webpack_require__(10);
 	
 	var _queue2 = _interopRequireDefault(_queue);
 	
-	var _worker = __webpack_require__(14);
+	var _worker = __webpack_require__(13);
 	
 	var _worker2 = _interopRequireDefault(_worker);
 	
@@ -108,33 +108,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	
 	  // ============================================
-	  // debug mode
+	  // SET DEBUG MODE
 	  // ============================================
 	  (0, _debug.setMode)(debug);
 	
 	  // ============================================
-	  // initialize queue and worker
+	  // INITIALIZE QUEUE AND WORKER
 	  // ============================================
 	  var queue = new _queue2.default();
 	  var worker = new _worker2.default(queue, { max: max, sleep: sleep });
 	
 	  // ============================================
-	  // Public Functions
+	  // PUBLIC INTERFACE
 	  // ============================================
 	
-	  // create an ajax request
-	  // that wraps inside a job with priority
-	  // and insert the job to the queue
-	  // finally return the request
 	  function ajax(url) {
-	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	    var priority = options.priority;
+	    var _ref2 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 	
-	    var rest = _objectWithoutProperties(options, ['priority']);
+	    var priority = _ref2.priority;
 	
-	    var req = new _request2.default(url, rest);
+	    var options = _objectWithoutProperties(_ref2, ['priority']);
+	
+	    var req = new _ajax2.default(url, options);
 	    var job = new _job2.default({ action: req.execute, priority: priority });
+	
 	    queue.add(job);
+	
 	    return req;
 	  }
 	
@@ -209,39 +208,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.default = undefined;
-	
-	var _ajax = __webpack_require__(5);
-	
-	var _ajax2 = _interopRequireDefault(_ajax);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	exports.default = _ajax2.default;
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 	
-	var _Version = __webpack_require__(6);
+	var _callbacks = __webpack_require__(5);
 	
-	var _Version2 = _interopRequireDefault(_Version);
+	var _callbacks2 = _interopRequireDefault(_callbacks);
 	
-	var _callbacks = __webpack_require__(7);
+	var _content_type = __webpack_require__(6);
 	
-	var _content_type = __webpack_require__(8);
+	var _content_type2 = _interopRequireDefault(_content_type);
 	
-	var _url = __webpack_require__(9);
+	var _url = __webpack_require__(7);
+	
+	var _version = __webpack_require__(8);
+	
+	var _version2 = _interopRequireDefault(_version);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -249,26 +233,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
+	var SKIP_STATUS = { status: 'skipped' };
+	var CANCEL_STATUS = { status: 'cancelled' };
+	
 	function someConditionMet(conditions, value) {
 	  return conditions.some(function (condition) {
 	    return condition(value);
 	  });
 	}
 	
-	function shouldSkip(conditions) {
-	  return someConditionMet(conditions);
+	function shouldSkip(conditions, version) {
+	  return someConditionMet(conditions) || version.sentIsOutdated();
 	}
 	
-	function shouldCancel(conditions, reject) {
+	function shouldCancel(resp, conditions, version, reject) {
+	  if (someConditionMet(conditions, resp) || version.receivedIsOutdated()) {
+	    resp = _extends({}, resp, CANCEL_STATUS);
+	    return reject(resp);
+	  }
+	}
+	
+	function proxy(callback) {
+	  for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	    args[_key - 1] = arguments[_key];
+	  }
+	
 	  return function (resp) {
-	    var skip = shouldSkip(conditions);
-	    if (skip) reject(_extends({}, resp, { status: 'cancelled' }));
-	    return skip;
+	    callback.apply(undefined, [resp].concat(args));
+	    return resp;
 	  };
 	}
 	
 	function initHeader(headers, type) {
-	  return new Headers(_extends({}, headers, (0, _content_type.requestContentType)(type)));
+	  return new Headers(_extends({}, headers, _content_type2.default.request(type)));
 	}
 	
 	function initBody(body, type) {
@@ -294,19 +291,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  return function (resolve, reject) {
 	    return function (conditions) {
+	      if (shouldSkip(conditions, version)) return reject(SKIP_STATUS);
 	
-	      if (shouldCancel(conditions, reject)()) return;
-	
-	      version.setAsCurrent();
-	
-	      return fetch(request).then(shouldCancel(conditions, reject)).then((0, _content_type.parseContentType)(type)).then(resolve).then(reject);
+	      version.sent();
+	      return fetch(request).then(proxy(shouldCancel, conditions, version, reject)).then(proxy(version.received)).then(proxy(function (resp) {
+	        return resp.version = version;
+	      })).then(_content_type2.default.parse(type)).then(resolve).catch(reject);
 	    };
 	  };
 	}
 	
-	function initExecute(action, conditions) {
+	function initExecute(func, conditions) {
 	  return function () {
-	    return action(conditions);
+	    return func(conditions);
 	  };
 	}
 	
@@ -322,14 +319,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    _classCallCheck(this, Ajax);
 	
+	    version = new _version2.default((0, _url.filterParams)(url), version);
+	
+	    var request = initRequest(url, options);
+	    var action = initAction(request, options, version);
+	
+	    this.conditions = [];
 	    this.q = new Promise(function (resolve, reject) {
-	      var request = initRequest(url, options);
-	      var version = new _Version2.default((0, _url.filterParams)(url), version);
-	      var action = initAction(request, options, version);
-	
 	      action = action(resolve, reject);
-	
-	      _this.conditions = [version.isOutdated];
 	      _this.execute = initExecute(action, _this.conditions);
 	    });
 	  }
@@ -343,23 +340,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'catch',
 	    value: function _catch(callback) {
-	      this.q.catch(callback);
+	      this.q = this.q.catch(callback);
 	      return this;
 	    }
 	  }, {
 	    key: 'fail',
 	    value: function fail(callback) {
-	      return this.then((0, _callbacks.onFail)(callback));
+	      return this.then(_callbacks2.default.onFail(callback));
 	    }
 	  }, {
 	    key: 'success',
 	    value: function success(callback) {
-	      return this.then((0, _callbacks.onSuccess)(callback));
+	      return this.then(_callbacks2.default.onSuccess(callback));
 	    }
 	  }, {
 	    key: 'then',
 	    value: function then(callback) {
-	      this.q.then(callback);
+	      this.q = this.q.then(callback);
 	      return this;
 	    }
 	  }]);
@@ -370,89 +367,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = Ajax;
 
 /***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function initValue() {
-	  return { counter: 0, current: 0 };
-	}
-	
-	var Version = function Version(key, willOutdated) {
-	  _classCallCheck(this, Version);
-	
-	  _initialiseProps.call(this);
-	
-	  this.willOutdated = willOutdated !== undefined ? willOutdated : true;
-	  this.key = key;
-	  this.id = Version.inc(key);
-	};
-	
-	// class VersionTracker {
-	//   constructor() {
-	//     this.initValue = 0
-	//     this.map = {}
-	//   }
-	
-	//   get(key) {
-	//     return this.map[key] || (this.map[key] = { counter: 0, current: 0 })
-	//   }
-	
-	//   getCounter(key) {
-	//     return this.get(key).counter
-	//   }
-	
-	//   getCurrent(key) {
-	//     return this.get(key).current
-	//   }
-	
-	//   setCurrent(key, val) {
-	//     return this.get(key).current = val
-	//   }
-	
-	//   inc(key) {
-	//     return (this.map[key] || (this.map[key] = this.get(key))).counter += 1
-	//   }
-	// }
-	
-	Version.map = {};
-	
-	Version.get = function (key) {
-	  return this.map[key] || (this.map[key] = initValue());
-	};
-	
-	Version.inc = function (key) {
-	  return this.get(key).counter += 1;
-	};
-	
-	var _initialiseProps = function _initialiseProps() {
-	  var _this = this;
-	
-	  this.isOutdated = function () {
-	    return _this.willOutdated && Version.get(_this.key).current > _this.id;
-	  };
-	
-	  this.setAsCurrent = function () {
-	    var versionForKey = Version.get(_this.key);
-	    if (versionForKey.current < _this.id) {
-	      return versionForKey.current = _this.id;
-	    }
-	
-	    debugger;
-	  };
-	};
-	
-	exports.default = Version;
-
-/***/ },
-/* 7 */
+/* 5 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -470,10 +385,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	}
 	
-	function onCatch(callback, cancelConditions) {
-	  return callback;
-	}
-	
 	function onFail(callback, cancelConditions) {
 	  return buildCallback(callback, function (resp) {
 	    return resp.status >= 400;
@@ -486,13 +397,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	}
 	
-	exports.buildCallback = buildCallback;
-	exports.onCatch = onCatch;
-	exports.onFail = onFail;
-	exports.onSuccess = onSuccess;
+	exports.default = { buildCallback: buildCallback, onFail: onFail, onSuccess: onSuccess };
 
 /***/ },
-/* 8 */
+/* 6 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -507,7 +415,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return resp._bodyBlob.type.includes('application/json');
 	}
 	
-	function parseContentType(type) {
+	function parse(type) {
 	  return function () {
 	    var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(resp) {
 	      return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -556,7 +464,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }();
 	}
 	
-	function requestContentType(type) {
+	function request(type) {
 	  if (type) {
 	    return {
 	      'Accept': 'application/json',
@@ -565,12 +473,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 	
-	exports.bodyContainsJson = bodyContainsJson;
-	exports.parseContentType = parseContentType;
-	exports.requestContentType = requestContentType;
+	exports.default = { bodyContainsJson: bodyContainsJson, parse: parse, request: request };
 
 /***/ },
-/* 9 */
+/* 7 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -587,7 +493,84 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.filterParams = filterParams;
 
 /***/ },
-/* 10 */
+/* 8 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function initValue() {
+	  return { counter: 0, sent: 0, received: 0 };
+	}
+	
+	var Version = function () {
+	  function Version(key, willOutdated) {
+	    _classCallCheck(this, Version);
+	
+	    _initialiseProps.call(this);
+	
+	    this.willOutdated = willOutdated !== undefined ? willOutdated : true;
+	    this.key = key;
+	    this.id = Version.inc(key);
+	  }
+	
+	  _createClass(Version, [{
+	    key: 'keyIsOyutdated',
+	    value: function keyIsOyutdated(key) {
+	      return this.willOutdated && Version.get(this.key)[key] > this.id;
+	    }
+	  }]);
+	
+	  return Version;
+	}();
+	
+	Version.map = {};
+	
+	Version.get = function (key) {
+	  return this.map[key] || (this.map[key] = initValue());
+	};
+	
+	Version.inc = function (key) {
+	  return this.get(key).counter += 1;
+	};
+	
+	var _initialiseProps = function _initialiseProps() {
+	  var _this = this;
+	
+	  this.sentIsOutdated = function () {
+	    return _this.keyIsOyutdated('sent');
+	  };
+	
+	  this.receivedIsOutdated = function () {
+	    return _this.keyIsOyutdated('received');
+	  };
+	
+	  this.sent = function () {
+	    var versionForKey = Version.get(_this.key);
+	    if (versionForKey.sent < _this.id) {
+	      return versionForKey.sent = _this.id;
+	    }
+	  };
+	
+	  this.received = function () {
+	    var versionForKey = Version.get(_this.key);
+	    if (versionForKey.received < _this.id) {
+	      return versionForKey.received = _this.id;
+	    }
+	  };
+	};
+	
+	exports.default = Version;
+
+/***/ },
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -622,7 +605,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.priority = priority;
 	    this.options = options;
 	
-	    (0, _debug.log)('Job', 'constructed', this.priority, this.options);
+	    (0, _debug.log)('Job', 'constructed', this);
 	  }
 	
 	  _createClass(Job, [{
@@ -634,7 +617,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          while (1) {
 	            switch (_context.prev = _context.next) {
 	              case 0:
-	                (0, _debug.log)('Job', 'executing', this.priority, this.options);
+	                (0, _debug.log)('Job', 'executing', this);
 	
 	                _context.next = 3;
 	                return this.action();
@@ -670,7 +653,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = Job;
 
 /***/ },
-/* 11 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -683,7 +666,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _fastpriorityqueue = __webpack_require__(12);
+	var _fastpriorityqueue = __webpack_require__(11);
 	
 	var _fastpriorityqueue2 = _interopRequireDefault(_fastpriorityqueue);
 	
@@ -693,55 +676,54 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
+	function defaultStrategy(_ref, _ref2) {
+	  var x = _ref.priority;
+	  var y = _ref2.priority;
+	
+	  return x !== undefined && x > y;
+	}
+	
 	var Queue = function () {
 	  function Queue() {
-	    var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	    var _ref3 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 	
-	    var _ref$strategy = _ref.strategy;
-	    var strategy = _ref$strategy === undefined ? this.__defaultStrategy__ : _ref$strategy;
-	    var debug = _ref.debug;
+	    var _ref3$strategy = _ref3.strategy;
+	    var strategy = _ref3$strategy === undefined ? defaultStrategy : _ref3$strategy;
+	    var debug = _ref3.debug;
 	
 	    _classCallCheck(this, Queue);
 	
-	    this.q = new _fastpriorityqueue2.default(strategy);
+	    this.queue = new _fastpriorityqueue2.default(strategy);
 	    this.debug = debug;
 	  }
 	
 	  _createClass(Queue, [{
 	    key: 'add',
 	    value: function add(obj) {
-	      if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object' && obj.hasOwnProperty('action')) {
-	        return this.q.add(obj);
+	      if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object' && typeof obj.action === 'function') {
+	        return this.queue.add(obj);
 	      }
 	    }
 	  }, {
 	    key: 'get',
 	    value: function get() {
-	      (0, _debug.log)('Queue', 'get', 'size: ' + this.size());
-	      return this.q.poll();
+	      (0, _debug.log)('Queue', 'get', 'size: ' + this.size);
+	      return this.queue.poll();
 	    }
 	  }, {
 	    key: 'isEmpty',
 	    value: function isEmpty() {
-	      return this.q.isEmpty();
-	    }
-	  }, {
-	    key: 'size',
-	    value: function size() {
-	      return this.q.size;
+	      return this.queue.isEmpty();
 	    }
 	  }, {
 	    key: 'cleanup',
 	    value: function cleanup() {
-	      return this.q.trim();
+	      return this.queue.trim();
 	    }
 	  }, {
-	    key: '__defaultStrategy__',
-	    value: function __defaultStrategy__(_ref2, _ref3) {
-	      var x = _ref2.priority;
-	      var y = _ref3.priority;
-	
-	      return x !== undefined && x > y;
+	    key: 'size',
+	    get: function get() {
+	      return this.queue.size;
 	    }
 	  }]);
 	
@@ -751,7 +733,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = Queue;
 
 /***/ },
-/* 12 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/**
@@ -921,10 +903,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	module.exports = FastPriorityQueue;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12)(module)))
 
 /***/ },
-/* 13 */
+/* 12 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -941,7 +923,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 14 */
+/* 13 */
 /***/ function(module, exports) {
 
 	"use strict";

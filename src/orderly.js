@@ -1,6 +1,6 @@
 import { setMode } from './debug'
 
-import Ajax from './orderly/request'
+import Ajax from './orderly/ajax'
 import Job from './orderly/job'
 import Queue from './orderly/queue'
 import Worker from './orderly/worker'
@@ -8,29 +8,26 @@ import Worker from './orderly/worker'
 function Orderly({ debug, max, sleep } = {}) {
 
   // ============================================
-  // debug mode
+  // SET DEBUG MODE
   // ============================================
   setMode(debug)
 
   // ============================================
-  // initialize queue and worker
+  // INITIALIZE QUEUE AND WORKER
   // ============================================
   let queue = new Queue
   let worker = new Worker(queue, { max, sleep })
 
   // ============================================
-  // Public Functions
+  // PUBLIC INTERFACE
   // ============================================
 
-  // create an ajax request
-  // that wraps inside a job with priority
-  // and insert the job to the queue
-  // finally return the request
-  function ajax(url, options = {}) {
-    let { priority, ...rest } = options
-    let req = new Ajax(url, rest)
+  function ajax(url, { priority, ...options } = {}) {
+    let req = new Ajax(url, options)
     let job = new Job({ action: req.execute, priority })
+
     queue.add(job)
+
     return req
   }
 
