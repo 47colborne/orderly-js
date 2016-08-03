@@ -1,4 +1,5 @@
 import FastPriorityQueue from 'fastpriorityqueue'
+import { log } from '../debug'
 
 class Queue {
   constructor({ strategy = this.__defaultStrategy__, debug } = {}) {
@@ -13,8 +14,7 @@ class Queue {
   }
 
   get() {
-    if (Queue.debug)
-      console.info('Orderly.Queue.get, current size: ', this.size())
+    log('Queue', 'get', `size: ${ this.size() }`)
     return this.q.poll()
   }
 

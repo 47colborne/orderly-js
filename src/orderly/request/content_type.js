@@ -15,10 +15,12 @@ function parseContentType(type) {
 }
 
 function requestContentType(type) {
-  return type ? {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  } : {}
+  if (type) {
+    return {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  }
 }
 
 export { bodyContainsJson, parseContentType, requestContentType }

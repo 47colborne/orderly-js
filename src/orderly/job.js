@@ -1,28 +1,23 @@
+import { log } from '../debug'
+
 class Job {
-  static counter = 0
-
-  static async invoke(job, callback) {
-    if (this.debug) this.log(job, 'Invoking')
-
-    let result = await job.action()
-
-    if (callback && typeof callback === 'function')
-      result = callback(result)
-
-    return result
-  }
-
-  static log(job, action) {
-    let { id, priority } = job
-    console.info(`Orderly.Job: ${action}, id:${id}, priority:${priority}`)
-  }
-
-  constructor({ action, priority = 0 }) {
-    this.id = (Job.counter += 1)
+  constructor({ action, priority = 0, ...options } = {}) {
     this.action = action
     this.priority = priority
+    this.options = options
 
-    if(Job.debug) Job.log(this, 'Constructed')
+    log('Job', 'constructed', this.priority, this.options)
+  }
+
+  async execute(callback) {
+    log('Job', 'executing', this.priority, this.options)
+
+    let result = await this.action()
+    if (callback && typeof callback === 'function') {
+      callback(result)
+    }
+
+    return result
   }
 }
 

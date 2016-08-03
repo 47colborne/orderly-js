@@ -77,156 +77,65 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 	
-	var _ajax_request = __webpack_require__(10);
+	var _debug = __webpack_require__(3);
 	
-	var _ajax_request2 = _interopRequireDefault(_ajax_request);
+	var _request = __webpack_require__(4);
 	
-	var _job = __webpack_require__(4);
+	var _request2 = _interopRequireDefault(_request);
+	
+	var _job = __webpack_require__(10);
 	
 	var _job2 = _interopRequireDefault(_job);
 	
-	var _queue = __webpack_require__(5);
+	var _queue = __webpack_require__(11);
 	
 	var _queue2 = _interopRequireDefault(_queue);
 	
-	var _worker = __webpack_require__(8);
+	var _worker = __webpack_require__(14);
 	
 	var _worker2 = _interopRequireDefault(_worker);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
 	function Orderly() {
-	  var config = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	  var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	
+	  var debug = _ref.debug;
+	  var max = _ref.max;
+	  var sleep = _ref.sleep;
 	
 	
 	  // ============================================
 	  // debug mode
 	  // ============================================
-	
-	  _ajax_request2.default.debug = _job2.default.debug = _queue2.default.debug = _worker2.default.debug = config.debug;
+	  (0, _debug.setMode)(debug);
 	
 	  // ============================================
-	  // initialize environment
+	  // initialize queue and worker
 	  // ============================================
-	
 	  var queue = new _queue2.default();
-	  var worker = new _worker2.default(queue, config);
-	
-	  // ============================================
-	  // Private Functions
-	  // ============================================
-	
-	  // filter out url params from the url
-	  // example:
-	  //   input: http://www.yroo.com/products/123?country=ca
-	  //   output: http://www.yroo.com/products/123
-	  // ============================================
-	
-	
-	  // filter abort condition
-	  // ============================================
-	
-	  function filterAbort(abort) {
-	    if (abort && typeof abort === 'function') return abort;
-	  }
-	
-	  // build version validation
-	  // ============================================
-	
-	
-	  // build cancel condition
-	  // request should cancel if version is outdated
-	  // or abort condition returns true
-	  // ============================================
-	
-	  function buildCancel(abort, url, version) {
-	    abort = filterAbort(abort);
-	    version = buildVersion(url, version);
-	    return function () {
-	      return version && !version() || abort && abort();
-	    };
-	  }
-	
-	  // check if request is success
-	  // ============================================
-	
-	  function isBadRequest(_ref) {
-	    var status = _ref.status;
-	
-	    return status >= 400;
-	  }
-	
-	  // returns a new job given action callback
-	  // and priority
-	  // ============================================
-	
-	  function buildJob(action, priority) {
-	    return new _job2.default({ action: action, priority: priority });
-	  }
-	
-	  function rejectBadRequest(reject) {
-	    return function (resp) {
-	      return isBadRequest(resp) ? reject(resp) : resp;
-	    };
-	  }
-	
-	  function responseType() {
-	    var _this = this;
-	
-	    var type = arguments.length <= 0 || arguments[0] === undefined ? 'text' : arguments[0];
-	
-	    return function () {
-	      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee(resp) {
-	        var body;
-	        return regeneratorRuntime.wrap(function _callee$(_context) {
-	          while (1) {
-	            switch (_context.prev = _context.next) {
-	              case 0:
-	                _context.next = 2;
-	                return resp[type]();
-	
-	              case 2:
-	                body = _context.sent;
-	                return _context.abrupt('return', _extends({}, resp, { body: body }));
-	
-	              case 4:
-	              case 'end':
-	                return _context.stop();
-	            }
-	          }
-	        }, _callee, _this);
-	      }));
-	
-	      return function (_x3) {
-	        return _ref2.apply(this, arguments);
-	      };
-	    }();
-	  }
-	
-	  function shouldCancel(cancel, reject) {
-	    return function (resp) {
-	      return cancel() ? reject(_extends({}, resp, { cancelled: true })) : resp;
-	    };
-	  }
+	  var worker = new _worker2.default(queue, { max: max, sleep: sleep });
 	
 	  // ============================================
 	  // Public Functions
 	  // ============================================
 	
+	  // create an ajax request
+	  // that wraps inside a job with priority
+	  // and insert the job to the queue
+	  // finally return the request
 	  function ajax(url) {
 	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 	    var priority = options.priority;
 	
-	    var req = new _ajax_request2.default(url, options);
-	    var job = buildJob(req.execute, priority);
+	    var rest = _objectWithoutProperties(options, ['priority']);
 	
+	    var req = new _request2.default(url, rest);
+	    var job = new _job2.default({ action: req.execute, priority: priority });
 	    queue.add(job);
-	
-	    return req.catch(function (err) {
-	      return console.log("ERROR", err);
-	    });
+	    return req;
 	  }
 	
 	  function get(url) {
@@ -259,9 +168,60 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = Orderly;
 
 /***/ },
-/* 3 */,
-/* 4 */
+/* 3 */
 /***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var mode = false;
+	
+	function setMode(boolean) {
+	  return mode = boolean;
+	}
+	
+	function getMode() {
+	  return mode;
+	}
+	
+	function log(klass, action) {
+	  var _console;
+	
+	  for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+	    args[_key - 2] = arguments[_key];
+	  }
+	
+	  if (mode) (_console = console).log.apply(_console, ["Orderly." + klass + " - " + action + " -"].concat(args));
+	}
+	
+	exports.setMode = setMode;
+	exports.getMode = getMode;
+	exports.log = log;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = undefined;
+	
+	var _ajax = __webpack_require__(5);
+	
+	var _ajax2 = _interopRequireDefault(_ajax);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	exports.default = _ajax2.default;
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
@@ -271,30 +231,420 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
+	var _Version = __webpack_require__(6);
+	
+	var _Version2 = _interopRequireDefault(_Version);
+	
+	var _callbacks = __webpack_require__(7);
+	
+	var _content_type = __webpack_require__(8);
+	
+	var _url = __webpack_require__(9);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+	
+	function someConditionMet(conditions, value) {
+	  return conditions.some(function (condition) {
+	    return condition(value);
+	  });
+	}
+	
+	function shouldSkip(conditions) {
+	  return someConditionMet(conditions);
+	}
+	
+	function shouldCancel(conditions, reject) {
+	  return function (resp) {
+	    var skip = shouldSkip(conditions);
+	    if (skip) reject(_extends({}, resp, { status: 'cancelled' }));
+	    return skip;
+	  };
+	}
+	
+	function initHeader(headers, type) {
+	  return new Headers(_extends({}, headers, (0, _content_type.requestContentType)(type)));
+	}
+	
+	function initBody(body, type) {
+	  return body && type === 'json' ? JSON.stringify(body) : body;
+	}
+	
+	function initRequest(url, _ref) {
+	  var headers = _ref.headers;
+	  var body = _ref.body;
+	  var type = _ref.type;
+	
+	  var options = _objectWithoutProperties(_ref, ['headers', 'body', 'type']);
+	
+	  headers = initHeader(headers, type);
+	  body = initBody(body, type);
+	  options = _extends({}, options, { headers: headers, body: body });
+	
+	  return new Request(url, _extends({}, options, { headers: headers, body: body }));
+	}
+	
+	function initAction(request, _ref2, version) {
+	  var type = _ref2.type;
+	
+	  return function (resolve, reject) {
+	    return function (conditions) {
+	
+	      if (shouldCancel(conditions, reject)()) return;
+	
+	      version.setAsCurrent();
+	
+	      return fetch(request).then(shouldCancel(conditions, reject)).then((0, _content_type.parseContentType)(type)).then(resolve).then(reject);
+	    };
+	  };
+	}
+	
+	function initExecute(action, conditions) {
+	  return function () {
+	    return action(conditions);
+	  };
+	}
+	
+	var Ajax = function () {
+	  function Ajax(url) {
+	    var _this = this;
+	
+	    var _ref3 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	    var version = _ref3.version;
+	
+	    var options = _objectWithoutProperties(_ref3, ['version']);
+	
+	    _classCallCheck(this, Ajax);
+	
+	    this.q = new Promise(function (resolve, reject) {
+	      var request = initRequest(url, options);
+	      var version = new _Version2.default((0, _url.filterParams)(url), version);
+	      var action = initAction(request, options, version);
+	
+	      action = action(resolve, reject);
+	
+	      _this.conditions = [version.isOutdated];
+	      _this.execute = initExecute(action, _this.conditions);
+	    });
+	  }
+	
+	  _createClass(Ajax, [{
+	    key: 'cancel',
+	    value: function cancel(callback) {
+	      this.conditions.push(callback);
+	      return this;
+	    }
+	  }, {
+	    key: 'catch',
+	    value: function _catch(callback) {
+	      this.q.catch(callback);
+	      return this;
+	    }
+	  }, {
+	    key: 'fail',
+	    value: function fail(callback) {
+	      return this.then((0, _callbacks.onFail)(callback));
+	    }
+	  }, {
+	    key: 'success',
+	    value: function success(callback) {
+	      return this.then((0, _callbacks.onSuccess)(callback));
+	    }
+	  }, {
+	    key: 'then',
+	    value: function then(callback) {
+	      this.q.then(callback);
+	      return this;
+	    }
+	  }]);
+	
+	  return Ajax;
+	}();
+	
+	exports.default = Ajax;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function initValue() {
+	  return { counter: 0, current: 0 };
+	}
+	
+	var Version = function Version(key, willOutdated) {
+	  _classCallCheck(this, Version);
+	
+	  _initialiseProps.call(this);
+	
+	  this.willOutdated = willOutdated !== undefined ? willOutdated : true;
+	  this.key = key;
+	  this.id = Version.inc(key);
+	};
+	
+	// class VersionTracker {
+	//   constructor() {
+	//     this.initValue = 0
+	//     this.map = {}
+	//   }
+	
+	//   get(key) {
+	//     return this.map[key] || (this.map[key] = { counter: 0, current: 0 })
+	//   }
+	
+	//   getCounter(key) {
+	//     return this.get(key).counter
+	//   }
+	
+	//   getCurrent(key) {
+	//     return this.get(key).current
+	//   }
+	
+	//   setCurrent(key, val) {
+	//     return this.get(key).current = val
+	//   }
+	
+	//   inc(key) {
+	//     return (this.map[key] || (this.map[key] = this.get(key))).counter += 1
+	//   }
+	// }
+	
+	Version.map = {};
+	
+	Version.get = function (key) {
+	  return this.map[key] || (this.map[key] = initValue());
+	};
+	
+	Version.inc = function (key) {
+	  return this.get(key).counter += 1;
+	};
+	
+	var _initialiseProps = function _initialiseProps() {
+	  var _this = this;
+	
+	  this.isOutdated = function () {
+	    return _this.willOutdated && Version.get(_this.key).current > _this.id;
+	  };
+	
+	  this.setAsCurrent = function () {
+	    var versionForKey = Version.get(_this.key);
+	    if (versionForKey.current < _this.id) {
+	      return versionForKey.current = _this.id;
+	    }
+	
+	    debugger;
+	  };
+	};
+	
+	exports.default = Version;
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	function buildCallback(callback, condition) {
+	  return function (resp) {
+	    if (condition(resp)) {
+	      resp = callback(resp);
+	    }
+	
+	    return resp;
+	  };
+	}
+	
+	function onCatch(callback, cancelConditions) {
+	  return callback;
+	}
+	
+	function onFail(callback, cancelConditions) {
+	  return buildCallback(callback, function (resp) {
+	    return resp.status >= 400;
+	  });
+	}
+	
+	function onSuccess(callback, cancelConditions) {
+	  return buildCallback(callback, function (resp) {
+	    return resp.status < 400;
+	  });
+	}
+	
+	exports.buildCallback = buildCallback;
+	exports.onCatch = onCatch;
+	exports.onFail = onFail;
+	exports.onSuccess = onSuccess;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
 	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+	
+	function bodyContainsJson(resp) {
+	  return resp._bodyBlob.type.includes('application/json');
+	}
+	
+	function parseContentType(type) {
+	  return function () {
+	    var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(resp) {
+	      return regeneratorRuntime.wrap(function _callee$(_context) {
+	        while (1) {
+	          switch (_context.prev = _context.next) {
+	            case 0:
+	              if (!type) {
+	                _context.next = 6;
+	                break;
+	              }
+	
+	              _context.next = 3;
+	              return resp[type]();
+	
+	            case 3:
+	              resp.data = _context.sent;
+	              _context.next = 10;
+	              break;
+	
+	            case 6:
+	              if (!bodyContainsJson(resp)) {
+	                _context.next = 10;
+	                break;
+	              }
+	
+	              _context.next = 9;
+	              return resp.json();
+	
+	            case 9:
+	              resp.data = _context.sent;
+	
+	            case 10:
+	              return _context.abrupt('return', resp);
+	
+	            case 11:
+	            case 'end':
+	              return _context.stop();
+	          }
+	        }
+	      }, _callee, this);
+	    }));
+	
+	    return function (_x) {
+	      return _ref.apply(this, arguments);
+	    };
+	  }();
+	}
+	
+	function requestContentType(type) {
+	  if (type) {
+	    return {
+	      'Accept': 'application/json',
+	      'Content-Type': 'application/json'
+	    };
+	  }
+	}
+	
+	exports.bodyContainsJson = bodyContainsJson;
+	exports.parseContentType = parseContentType;
+	exports.requestContentType = requestContentType;
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var PARAMS_FORMAT = new RegExp(/\?.*$/);
+	
+	function filterParams(url) {
+	  return url.toString().replace(PARAMS_FORMAT, '');
+	}
+	
+	exports.filterParams = filterParams;
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _debug = __webpack_require__(3);
+	
+	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+	
+	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
 	var Job = function () {
-	  _createClass(Job, null, [{
-	    key: 'invoke',
+	  function Job() {
+	    var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	
+	    var action = _ref.action;
+	    var _ref$priority = _ref.priority;
+	    var priority = _ref$priority === undefined ? 0 : _ref$priority;
+	
+	    var options = _objectWithoutProperties(_ref, ['action', 'priority']);
+	
+	    _classCallCheck(this, Job);
+	
+	    this.action = action;
+	    this.priority = priority;
+	    this.options = options;
+	
+	    (0, _debug.log)('Job', 'constructed', this.priority, this.options);
+	  }
+	
+	  _createClass(Job, [{
+	    key: 'execute',
 	    value: function () {
-	      var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(job, callback) {
+	      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee(callback) {
 	        var result;
 	        return regeneratorRuntime.wrap(function _callee$(_context) {
 	          while (1) {
 	            switch (_context.prev = _context.next) {
 	              case 0:
-	                if (this.debug) this.log(job, 'Invoking');
+	                (0, _debug.log)('Job', 'executing', this.priority, this.options);
 	
 	                _context.next = 3;
-	                return job.action();
+	                return this.action();
 	
 	              case 3:
 	                result = _context.sent;
 	
-	
-	                if (callback && typeof callback === 'function') result = callback(result);
+	                if (callback && typeof callback === 'function') {
+	                  callback(result);
+	                }
 	
 	                return _context.abrupt('return', result);
 	
@@ -306,44 +656,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, _callee, this);
 	      }));
 	
-	      function invoke(_x, _x2) {
-	        return _ref.apply(this, arguments);
+	      function execute(_x2) {
+	        return _ref2.apply(this, arguments);
 	      }
 	
-	      return invoke;
+	      return execute;
 	    }()
-	  }, {
-	    key: 'log',
-	    value: function log(job, action) {
-	      var id = job.id;
-	      var priority = job.priority;
-	
-	      console.info('Orderly.Job: ' + action + ', id:' + id + ', priority:' + priority);
-	    }
 	  }]);
-	
-	  function Job(_ref2) {
-	    var action = _ref2.action;
-	    var _ref2$priority = _ref2.priority;
-	    var priority = _ref2$priority === undefined ? 0 : _ref2$priority;
-	
-	    _classCallCheck(this, Job);
-	
-	    this.id = Job.counter += 1;
-	    this.action = action;
-	    this.priority = priority;
-	
-	    if (Job.debug) Job.log(this, 'Constructed');
-	  }
 	
 	  return Job;
 	}();
 	
-	Job.counter = 0;
 	exports.default = Job;
 
 /***/ },
-/* 5 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -356,9 +683,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _fastpriorityqueue = __webpack_require__(6);
+	var _fastpriorityqueue = __webpack_require__(12);
 	
 	var _fastpriorityqueue2 = _interopRequireDefault(_fastpriorityqueue);
+	
+	var _debug = __webpack_require__(3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -388,7 +717,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'get',
 	    value: function get() {
-	      if (Queue.debug) console.info('Orderly.Queue.get, current size: ', this.size());
+	      (0, _debug.log)('Queue', 'get', 'size: ' + this.size());
 	      return this.q.poll();
 	    }
 	  }, {
@@ -422,7 +751,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = Queue;
 
 /***/ },
-/* 6 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/**
@@ -592,10 +921,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	module.exports = FastPriorityQueue;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13)(module)))
 
 /***/ },
-/* 7 */
+/* 13 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -612,22 +941,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
+/* 14 */
+/***/ function(module, exports) {
 
-	'use strict';
+	"use strict";
 	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _job = __webpack_require__(4);
-	
-	var _job2 = _interopRequireDefault(_job);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -645,7 +968,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _classCallCheck(this, Worker);
 	
 	    this.start = function () {
-	
 	      while (_this.available && _this.hasJob) {
 	        _this.pending += 1;
 	        var job = _this.queue.get();
@@ -657,7 +979,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	
 	    this.execute = function (job) {
-	      return _job2.default.invoke(job, _this.complete);
+	      return job.execute(_this.complete);
 	    };
 	
 	    this.complete = function () {
@@ -668,22 +990,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.sleep = sleep;
 	    this.max = max;
 	    this.pending = 0;
-	
 	    this.start();
 	  }
 	
 	  _createClass(Worker, [{
-	    key: 'dispatch',
+	    key: "dispatch",
 	    value: function dispatch(func, job) {
 	      return setTimeout(func, 0, job);
 	    }
 	  }, {
-	    key: 'available',
+	    key: "available",
 	    get: function get() {
 	      return this.pending < this.max;
 	    }
 	  }, {
-	    key: 'hasJob',
+	    key: "hasJob",
 	    get: function get() {
 	      return !this.queue.isEmpty();
 	    }
@@ -693,337 +1014,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}();
 	
 	exports.default = Worker;
-
-/***/ },
-/* 9 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	var VersionTracker = function () {
-	  function VersionTracker() {
-	    _classCallCheck(this, VersionTracker);
-	
-	    this.initValue = 0;
-	    this.map = {};
-	  }
-	
-	  _createClass(VersionTracker, [{
-	    key: "get",
-	    value: function get(key) {
-	      return this.map[key] || (this.map[key] = { counter: 0, current: 0 });
-	    }
-	  }, {
-	    key: "getCounter",
-	    value: function getCounter(key) {
-	      return this.get(key).counter;
-	    }
-	  }, {
-	    key: "getCurrent",
-	    value: function getCurrent(key) {
-	      return this.get(key).current;
-	    }
-	  }, {
-	    key: "setCurrent",
-	    value: function setCurrent(key, val) {
-	      return this.get(key).current = val;
-	    }
-	  }, {
-	    key: "inc",
-	    value: function inc(key) {
-	      return (this.map[key] || (this.map[key] = this.get(key))).counter += 1;
-	    }
-	  }]);
-	
-	  return VersionTracker;
-	}();
-	
-	exports.default = VersionTracker;
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-	
-	var _version_tracker = __webpack_require__(9);
-	
-	var _version_tracker2 = _interopRequireDefault(_version_tracker);
-	
-	var _callbacks = __webpack_require__(11);
-	
-	var _content_type = __webpack_require__(12);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	var VERSIONS = new _version_tracker2.default();
-	
-	var URL_PARAMS_FORMAT = new RegExp(/\?.*$/);
-	
-	function filterUrlParams(url) {
-	  return url.toString().replace(URL_PARAMS_FORMAT, '');
-	}
-	
-	function shouldSkip(cancelConditions) {
-	  return !cancelConditions.every(function (condition) {
-	    return !condition();
-	  });
-	}
-	
-	function shouldContinue(id, cancelConditions, reject) {
-	  return function (resp) {
-	    if (!cancelConditions.every(function (condition) {
-	      return !condition(resp);
-	    })) {
-	      reject(_extends({}, resp, { status: 'cancelled', id: id }));
-	    }
-	
-	    return resp;
-	  };
-	}
-	
-	function buildHeaders(_ref) {
-	  var _ref$headers = _ref.headers;
-	  var headers = _ref$headers === undefined ? {} : _ref$headers;
-	  var type = _ref.type;
-	
-	  return new Headers(Object.assign(headers, (0, _content_type.requestContentType)(type)));
-	}
-	
-	function buildBody(_ref2) {
-	  var body = _ref2.body;
-	  var type = _ref2.type;
-	
-	  return body ? type === 'json' ? JSON.stringify(body) : body : "";
-	}
-	
-	function buildRequest(url, options) {
-	  var credentials = options.credentials;
-	  var mode = options.mode;
-	  var method = options.method;
-	  var redirect = options.redirect;
-	
-	  var headers = buildHeaders(options);
-	  var config = { headers: headers, credentials: credentials, mode: mode, method: method, redirect: redirect };
-	
-	  var body = buildBody(options);
-	  if (body) config.body = body;
-	
-	  return new Request(url, config);
-	}
-	
-	function buildDelayedAction(key, id, request, _ref3, cancelConditions) {
-	  var type = _ref3.type;
-	
-	  return function (resolve, reject) {
-	    return function () {
-	      if (shouldSkip(cancelConditions)) {
-	        reject({ status: 'skipped', id: id });
-	      } else {
-	        VERSIONS.setCurrent(key, id);
-	
-	        return fetch(request).then(shouldContinue(id, cancelConditions, reject)).then((0, _content_type.parseContentType)(type)).then(resolve).catch(reject);
-	      }
-	    };
-	  };
-	}
-	
-	var AjaxRequest = function () {
-	  function AjaxRequest(url) {
-	    var _this = this;
-	
-	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	
-	    _classCallCheck(this, AjaxRequest);
-	
-	    var request = buildRequest(url, options);
-	    var key = filterUrlParams(url);
-	    var id = VERSIONS.inc(key);
-	
-	    this.cancelConditions = [];
-	    if (options.version !== false) {
-	      var version = function version() {
-	        return VERSIONS.getCurrent(key) > id;
-	      };
-	      this.cancelConditions.push(version);
-	    }
-	
-	    this.action = buildDelayedAction(key, id, request, options, this.cancelConditions);
-	
-	    this.promise = new Promise(function (resolve, reject) {
-	      _this.execute = _this.action(resolve, reject);
-	    });
-	  }
-	
-	  _createClass(AjaxRequest, [{
-	    key: 'cancel',
-	    value: function cancel(callback) {
-	      this.cancelConditions.push(callback);
-	      return this;
-	    }
-	  }, {
-	    key: 'catch',
-	    value: function _catch(callback) {
-	      console.log('catch');
-	      this.promise.catch(callback);
-	      return this;
-	    }
-	  }, {
-	    key: 'fail',
-	    value: function fail(callback) {
-	      return this.then((0, _callbacks.onFail)(callback));
-	    }
-	  }, {
-	    key: 'success',
-	    value: function success(callback) {
-	      return this.then((0, _callbacks.onSuccess)(callback));
-	    }
-	  }, {
-	    key: 'then',
-	    value: function then(callback) {
-	      this.promise.then(callback);
-	      return this;
-	    }
-	  }]);
-	
-	  return AjaxRequest;
-	}();
-	
-	exports.default = AjaxRequest;
-
-/***/ },
-/* 11 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	function buildCallback(callback, condition) {
-	  return function (resp) {
-	    if (condition(resp)) {
-	      resp = callback(resp);
-	    }
-	
-	    return resp;
-	  };
-	}
-	
-	function onCatch(callback, cancelConditions) {
-	  return callback;
-	}
-	
-	function onFail(callback, cancelConditions) {
-	  return buildCallback(callback, function (resp) {
-	    return resp.status >= 400;
-	  });
-	}
-	
-	function onSuccess(callback, cancelConditions) {
-	  return buildCallback(callback, function (resp) {
-	    return resp.status < 400;
-	  });
-	}
-	
-	exports.buildCallback = buildCallback;
-	exports.onCatch = onCatch;
-	exports.onFail = onFail;
-	exports.onSuccess = onSuccess;
-
-/***/ },
-/* 12 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
-	
-	function bodyContainsJson(resp) {
-	  return resp._bodyBlob.type.includes('application/json');
-	}
-	
-	function parseContentType(type) {
-	  return function () {
-	    var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(resp) {
-	      return regeneratorRuntime.wrap(function _callee$(_context) {
-	        while (1) {
-	          switch (_context.prev = _context.next) {
-	            case 0:
-	              if (!type) {
-	                _context.next = 6;
-	                break;
-	              }
-	
-	              _context.next = 3;
-	              return resp[type]();
-	
-	            case 3:
-	              resp.data = _context.sent;
-	              _context.next = 10;
-	              break;
-	
-	            case 6:
-	              if (!bodyContainsJson(resp)) {
-	                _context.next = 10;
-	                break;
-	              }
-	
-	              _context.next = 9;
-	              return resp.json();
-	
-	            case 9:
-	              resp.data = _context.sent;
-	
-	            case 10:
-	              return _context.abrupt('return', resp);
-	
-	            case 11:
-	            case 'end':
-	              return _context.stop();
-	          }
-	        }
-	      }, _callee, this);
-	    }));
-	
-	    return function (_x) {
-	      return _ref.apply(this, arguments);
-	    };
-	  }();
-	}
-	
-	function requestContentType(type) {
-	  return type ? {
-	    'Accept': 'application/json',
-	    'Content-Type': 'application/json'
-	  } : {};
-	}
-	
-	exports.bodyContainsJson = bodyContainsJson;
-	exports.parseContentType = parseContentType;
-	exports.requestContentType = requestContentType;
 
 /***/ }
 /******/ ])

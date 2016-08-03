@@ -1,17 +1,13 @@
-import Job from './job'
-
 class Worker {
   constructor(queue, { sleep = 50, max = 8 } = {}) {
     this.queue = queue
     this.sleep = sleep
     this.max = max
     this.pending = 0
-
     this.start()
   }
 
   start = () => {
-
     while (this.available && this.hasJob) {
       this.pending += 1
       let job = this.queue.get()
@@ -27,7 +23,7 @@ class Worker {
   }
 
   execute = (job) => {
-    return Job.invoke(job, this.complete)
+    return job.execute(this.complete)
   }
 
   complete = () => {
