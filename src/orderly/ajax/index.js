@@ -25,7 +25,7 @@ function shouldSkip(conditions, version) {
   return someConditionMet(conditions) || version.sentIsOutdated()
 }
 
-function shouldCancel(resp, conditions, version, reject) {
+function shouldCancel(resp, conditions, version, priority, reject) {
   if (someConditionMet(conditions, resp) || version.receivedIsOutdated()) {
     logAction('CANCELLED', version, priority)
     resp = { ...resp, status: CANCEL_STATUS }
@@ -72,9 +72,9 @@ function initAction(request, { type, priority }, version) {
       logAction('SENT', version, priority)
 
       return fetch(request)
-        .then(proxy(shouldCancel, conditions, version, reject))
+        .then(proxy(shouldCancel, conditions, version, priority, reject))
         .then(proxy(version.received))
-        .then(proxy(stamp, STAMP_KEY, version.toString()))
+        .then(proxy(stamp, STAMP_KEY, version))
         .then(contentType.parse(type))
         .then(resolve)
         .catch(reject)

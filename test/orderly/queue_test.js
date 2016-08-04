@@ -8,103 +8,78 @@ describe('Queue', function() {
     return { priority, action }
   }
 
-  // describe('initialize', function() {
-  //   let insertJobs = (q, ...jobs) => jobs.forEach(j => q.add(j))
-  //   let expectJobs = (q, ...jobs) => jobs.forEach(j => expect(q.get()).to.include(j))
-
-  //   it('should run with default priority strategy', function() {
-  //     let queue = new Queue
-
-  //     insertJobs(queue, { priority: 6 }, { priority: 3 }, { priority: 9 })
-  //     expectJobs(queue, { priority: 9 }, { priority: 6 }, { priority: 3 })
-  //   })
-
-  //   it('accepts an strategy function', function() {
-  //     let strategy = (x, y) => x.p < y.p
-  //     let queue = new Queue({ strategy })
-
-  //     insertJobs(queue, { p: 1 }, { p: 3 }, { p: 2 })
-  //     expectJobs(queue, { p: 1 }, { p: 2 }, { p: 3 })
-  //   })
-  // })
-
-  // describe('add', function() {
-  //   let queue = new Queue()
-
-  //   context('when trying to add an valid job', function() {
-  //     let job = {}
-
-  //     it('should add a job into the queue', function() {
-  //       expect(() => queue.add(job)).to.increase(queue.q, 'size')
-  //     })
-  //   })
-
-  //   context('when trying to add an invalid job', function() {
-  //     let job = "invalid job"
-
-  //     it('should not add to the queue', function() {
-  //       expect(() => queue.add(job)).to.not.change(queue.q, 'size')
-  //     })
-  //   })
-  // })
+  let queue = new Queue()
+  beforeEach(function() { queue = new Queue })
 
   describe('#add', function() {
-    let queue = new Queue()
-    beforeEach(function() { queue = new Queue })
-
-    it('will accepts a job with action', function() {
-      expect(() => queue.add({ action: () => {} })).to.increase(queue, 'size')
+    it('accepts a job with action', function() {
+      expect(() => queue.add(stubJob())).to.increase(queue.queue, 'size')
     })
 
-    it('will reject a job without action', function() {
-      expect(() => queue.add({ something: 'else' })).to.not.increase(queue, 'size')
+    it('returns the job', function() {
+      let job = stubJob()
+      expect(queue.add(job)).to.eq(job)
     })
 
-    it('will reject a job that is not an object', function() {
-      expect(() => queue.add('job')).to.not.increase(queue, 'size')
+    it('thorws an error if invalid job is inserted', function() {
+      expect(() => queue.add('invalid job')).to.throw(Error)
     })
   })
 
   describe('#get', function() {
-    let queue = new Queue()
-    beforeEach(function() { queue = new Queue })
+    it('returns a job with any priority first', function() {
+      let noPriorityJob = stubJob(undefined)
+      let highPriorityJob = stubJob(10)
+      queue.add(noPriorityJob)
+      queue.add(highPriorityJob)
 
-    it('returns a job that has highest priority', function() {
-      queue.add(stubJob())
+      expect(queue.get()).to.eq(highPriorityJob)
     })
 
+    it('returns a job with highest priority first', function() {
+      let lowPriorityJob = stubJob(1)
+      let highPriorityJob = stubJob(10)
+      queue.add(lowPriorityJob)
+      queue.add(highPriorityJob)
+
+      expect(queue.get()).to.eq(highPriorityJob)
+    })
+
+    context('when queue is empty', function() {
+      it('returns undefined', function() {
+        expect(queue.isEmpty()).to.eq(true)
+        expect(queue.get()).to.eq(undefined)
+      })
+    })
   })
 
-  // describe('get', function() {
-  //   let queue = new Queue()
+  describe('#isEmpty', function() {
+    it('returns true when queue is empty', function() {
+      expect(queue.isEmpty()).to.eq(true)
+    })
 
+    it('returns false when queue is not empty', function() {
+      queue.add(stubJob())
+      expect(queue.isEmpty()).to.eq(false)
+    })
+  })
 
-  //   context('when queue is not empty', function() {
-  //     let job = { description: "Test Job" }
-  //     beforeEach(function() { queue.add(job) })
+  describe('#size', function() {
+    it('should the length of the job', function() {
+      let size = Math.floor(Math.random() * 10 + 1)
+      let jobs = new Array(size)
+        .fill(undefined)
+        .forEach(() => queue.add(stubJob()))
 
-  //     it('should return the job', function() {
-  //       expect(queue.get()).to.equal(job)
-  //     })
-  //   })
+      expect(queue.size()).to.eq(size)
+    })
+  })
 
-  //   context('when queue is empty', function() {
-  //     it('should return undefined', function() {
-  //       expect(queue.get()).to.equal(undefined)
-  //     })
-  //   })
-  // })
-
-  // // describe('isEmpty', function() {
-  //   let queue = new Queue
-  //   afterEach(function() { queue = new Queue() })
-
-  //   it('should return true when queue is empty', function() {
-  //     expect(queue.isEmpty()).to.equal(true)
-  //   })
-  //   it('should return false when queue is not empty', function() {
-  //     queue.add({})
-  //     expect(queue.isEmpty()).to.equal(false)
-  //   })
-  // })
+  describe('#cleanup', function() {
+    it('should trigger FastPriorityQueue#trim', function() {
+      queue.queue.trim = sinon.spy()
+      queue.cleanup()
+      expect(queue.queue.trim).to.have.been.called
+    })
+  })
 })

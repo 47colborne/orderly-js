@@ -1,41 +1,43 @@
+function isFree(pending, max) {
+  return pending <= max
+}
+
+function hasJob(queue) {
+  return !queue.isEmpty()
+}
+
+function dispatch(func, ...args) {
+  return setTimeout(func, 0, ...args)
+}
+
 class Worker {
   constructor(queue, { sleep = 50, max = 8 } = {}) {
-    this.queue = queue
-    this.sleep = sleep
-    this.max = max
     this.pending = 0
-    this.start()
+    this.continue = true
+
+    this.start(queue, sleep, max)
   }
 
-  start = () => {
-    while (this.available && this.hasJob) {
+  start = (queue, sleep, max) => {
+    while (this.continue && isFree(this.pending, max) && hasJob(queue)) {
       this.pending += 1
-      let job = this.queue.get()
-      this.dispatch(this.execute, job)
+      let job = queue.get()
+      dispatch(job.execute, this.complete)
     }
 
-    this.queue.cleanup()
-    setTimeout(this.start, this.sleep)
+    if (this.continue) {
+      queue.cleanup()
+      this.setTimeout = setTimeout(this.start, sleep, queue, sleep, max)
+    }
   }
 
-  dispatch(func, job) {
-    return setTimeout(func, 0, job)
-  }
-
-  execute = (job) => {
-    return job.execute(this.complete)
+  stop() {
+    this.continue = false
+    clearTimeout(this.setTimeout)
   }
 
   complete = () => {
     this.pending -= 1
-  }
-
-  get available() {
-    return this.pending < this.max
-  }
-
-  get hasJob() {
-    return !this.queue.isEmpty()
   }
 }
 

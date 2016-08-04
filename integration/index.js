@@ -12,49 +12,49 @@ function randomInt(base = 0, variance = 10) {
 }
 
 let randomPriorities = new Array(100)
-  .fill()
+  .fill(undefined)
   .map(randomPriority)
 
 
 // BASIC CASE
 // ==============================================
 
-// setTimeout(() => {
-//   randomPriorities.forEach((priority, index) => {
-//     setTimeout(() => {
-//       o.get('https://api.github.com/users', {
-//         type: 'json',
-//         priority: priority
-//         // version: false
-//       })
-//        .cancel(resp => false)
-//        .then(resp => console.log('complete', resp.version))
-//        .catch(err => console.log('ERROR!!!', err))
-
-//     }, randomInt())
-
-//   })
-
-// }, randomInt())
-
 setTimeout(() => {
   randomPriorities.forEach((priority, index) => {
     setTimeout(() => {
-
       o.get('https://api.github.com/users', {
         type: 'json',
-        priority: randomInt(1, 10)
+        priority: priority
+        // version: false
       })
-       // .cancel(resp => false)
-       .success(resp => {})
-       .fail(resp => {})
-       .catch(err => {})
+       .cancel(resp => false)
+       .success(resp => console.log('COMPLETE', resp._v))
+       .catch(err => console.log('ERROR!!!', err))
 
-    }, randomInt(0, 2000))
+    }, randomInt())
 
   })
 
 }, randomInt())
+
+// setTimeout(() => {
+//   randomPriorities.forEach((priority, index) => {
+//     setTimeout(() => {
+
+//       o.get('https://api.github.com/users', {
+//         type: 'json',
+//         priority: randomInt(1, 10)
+//       })
+//        // .cancel(resp => false)
+//        .success(resp => {})
+//        .fail(resp => {})
+//        .catch(err => {})
+
+//     }, randomInt(0, 2000))
+
+//   })
+
+// }, randomInt())
 
 
 // VERSIONED CASE

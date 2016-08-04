@@ -24,10 +24,7 @@ function Orderly({ debug, max, sleep } = {}) {
 
   function ajax(url, options = {}) {
     let req = new Ajax(url, options)
-    let job = new Job({
-      action: req.execute,
-      priority: options.priority
-    })
+    let job = new Job({ action: req.execute, priority: options.priority })
 
     queue.add(job)
 
@@ -35,19 +32,19 @@ function Orderly({ debug, max, sleep } = {}) {
   }
 
   function get(url, options = {}) {
-    return ajax(url, { ...options, method: 'GET' })
+    return ajax(url, Object.assign(options, { method: 'GET' }))
   }
 
   function post(url, options = {}) {
-    return ajax(url, { ...options, method: 'POST' })
+    return ajax(url, Object.assign(options, { method: 'POST' }))
   }
 
   function put(url, options = {}) {
-    return ajax(url, { ...options, method: 'PUT' })
+    return ajax(url, Object.assign(options, { method: 'PUT' }))
   }
 
   function del(url, options = {}) {
-    return ajax(url, { ...options, method: 'DELETE' })
+    return ajax(url, Object.assign(options, { method: 'DELETE' }))
   }
 
   return { ajax, get, post, put, del, queue, worker }

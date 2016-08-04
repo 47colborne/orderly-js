@@ -2,24 +2,25 @@ import FastPriorityQueue from 'fastpriorityqueue'
 import { log } from './debug'
 
 function defaultStrategy({ priority: x }, { priority: y }) {
-  return x !== undefined && x > y
+  return y === undefined || x > y
 }
 
 class Queue {
-  constructor({ strategy = defaultStrategy, debug } = {}) {
+  constructor({ strategy = defaultStrategy } = {}) {
     this.queue = new FastPriorityQueue(strategy)
-    this.debug = debug
   }
 
   add(obj) {
     if (typeof obj === 'object' && typeof obj.action === 'function') {
       this.queue.add(obj)
       return obj
+    } else {
+      throw new Error('trying to insert an invalid job', obj)
     }
   }
 
   get() {
-    log('Queue', 'getting a job', { size: this.size })
+    log('Queue', 'getting a job', { size: this.size() })
     return this.queue.poll()
   }
 
@@ -27,7 +28,7 @@ class Queue {
     return this.queue.isEmpty()
   }
 
-  get size() {
+  size() {
     return this.queue.size
   }
 

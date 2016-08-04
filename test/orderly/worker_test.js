@@ -8,13 +8,9 @@ describe('Worker', function() {
 
   // let queue = new Queue()
 
-  // beforeEach(function() {
-  //   this.clock = sinon.useFakeTimers()
-  // })
 
-  // afterEach(function() {
-  //   this.clock.restore()
-  // })
+
+
 
   // describe('start', function() {
   //   it('should start an interval job', function() {

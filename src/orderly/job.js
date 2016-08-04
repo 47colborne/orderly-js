@@ -5,7 +5,7 @@ class Job {
     this.options = options
   }
 
-  async execute(callback) {
+  execute = async (callback) => {
     let result = await this.action()
     if (callback && typeof callback === 'function') {
       callback(result)
