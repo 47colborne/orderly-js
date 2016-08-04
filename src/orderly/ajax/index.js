@@ -11,8 +11,8 @@ const STAMP_KEY = '_v'
 
 function logAction(action, version, priority) {
   log('Ajax', action, {
+    url: version.key,
     id: version.id,
-    key: version.key,
     priority
   })
 }
@@ -30,6 +30,8 @@ function shouldCancel(resp, conditions, version, reject) {
     logAction('CANCELLED', version, priority)
     resp = { ...resp, status: CANCEL_STATUS }
     return reject(resp)
+  } else {
+    logAction('RECEIVED', version, priority)
   }
 }
 

@@ -14,9 +14,9 @@ function log(klass, action, args = {}) {
       let value = args[key]
       if (typeof value === 'object') value = JSON.stringify(value)
       return `${ msg } ${ key }:${ value }`
-    }, `<Orderly.${ klass }`)
+    }, klass)
 
-    msg += `> ${ action }`
+    msg = msg + ' ' + action
 
     console.log(msg)
   }
