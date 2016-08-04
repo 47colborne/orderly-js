@@ -1,1 +1,1 @@
-module.exports = require('./orderly.js')
+module.exports = require('./orderly')

@@ -1,27 +1,17 @@
 class Job {
-  static counter = 0
-
-  static invoke(job, callback) {
-    if (this.debug) this.log(job, 'Invoking')
-    let q = job.action()
-
-    if (callback && typeof callback === 'function')
-      q.then(callback)
-
-    return q
-  }
-
-  static log(job, action) {
-    let { id, priority } = job
-    console.info(`Orderly.Job: ${action}, id:${id}, priority:${priority}`)
-  }
-
-  constructor({ action, priority = 0 }) {
-    this.id = (Job.counter += 1)
+  constructor({ action, priority = 0, ...options } = {}) {
     this.action = action
     this.priority = priority
+    this.options = options
+  }
 
-    if(Job.debug) Job.log(this, 'Constructed')
+  execute = async (callback) => {
+    let result = await this.action()
+    if (callback && typeof callback === 'function') {
+      callback(result)
+    }
+
+    return result
   }
 }
 

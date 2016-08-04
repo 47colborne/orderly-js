@@ -5,7 +5,7 @@ let webpack = require('webpack')
 
 const PATH = (p) => path.join(__dirname, '..', p || '')
 
-module.exports = {
+const CONFIG = {
   context: PATH('src'),
   entry: {
     orderly: ['./index.js']
@@ -25,8 +25,15 @@ module.exports = {
       excludes: ['node_modules']
     }]
   },
-  devtool: 'source-map',
-  plugins: [
-    new webpack.optimize.UglifyJsPlugin({ minimize: true })
+  devtool: 'cheap-module-source-map',
+  plugins: []
+}
+
+if (process.env.NODE_ENV === 'compile') {
+  CONFIG.plugins = [
+    new webpack.optimize.DedupePlugin(),
+    new webpack.optimize.UglifyJsPlugin()
   ]
 }
+
+module.exports = CONFIG

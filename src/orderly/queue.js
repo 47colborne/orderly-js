@@ -1,37 +1,39 @@
 import FastPriorityQueue from 'fastpriorityqueue'
-import Job from './job'
+import { log } from './debug'
+
+function defaultStrategy({ priority: x }, { priority: y }) {
+  return y === undefined || x > y
+}
 
 class Queue {
-  constructor({ strategy = this.__defaultStrategy__, debug } = {}) {
-    this.q = new FastPriorityQueue(strategy)
-    this.debug = debug
+  constructor({ strategy = defaultStrategy } = {}) {
+    this.queue = new FastPriorityQueue(strategy)
   }
 
   add(obj) {
-    if (typeof obj === 'object' && obj.hasOwnProperty('action')) {
-      return this.q.add(obj)
+    if (typeof obj === 'object' && typeof obj.action === 'function') {
+      this.queue.add(obj)
+      return obj
+    } else {
+      throw new Error('trying to insert an invalid job', obj)
     }
   }
 
   get() {
-    if (Queue.debug) console.info('Orderly.Queue size: ', this.size())
-    return this.q.poll()
+    log('Queue', 'getting a job', { size: this.size() })
+    return this.queue.poll()
   }
 
   isEmpty() {
-    return this.q.isEmpty()
+    return this.queue.isEmpty()
   }
 
   size() {
-    return this.q.size
+    return this.queue.size
   }
 
   cleanup() {
-    return this.q.trim()
-  }
-
-  __defaultStrategy__({ priority: x }, { priority: y }) {
-    return x !== undefined && x > y
+    return this.queue.trim()
   }
 }
 
