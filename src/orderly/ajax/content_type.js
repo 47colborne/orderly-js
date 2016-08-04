@@ -2,7 +2,7 @@ function bodyContainsJson(resp) {
   return resp._bodyBlob.type.includes('application/json')
 }
 
-function parse(type) {
+function responseContentType(type) {
   return async function(resp) {
     if (type) {
       resp.data = await resp[type]()
@@ -14,7 +14,7 @@ function parse(type) {
   }
 }
 
-function request(type) {
+function requestContentType(type) {
   if (type) {
     return {
       'Accept': 'application/json',
@@ -23,4 +23,4 @@ function request(type) {
   }
 }
 
-export default { bodyContainsJson, parse, request }
+export { bodyContainsJson, responseContentType, requestContentType }

@@ -16,4 +16,4 @@ function onSuccess(callback, cancelConditions) {
   return buildCallback(callback, (resp) => resp.status < 400)
 }
 
-export default { buildCallback, onFail, onSuccess }
+export { buildCallback, onFail, onSuccess }

@@ -1,5 +1,5 @@
-import callbacks from './callbacks'
-import contentType from './content_type'
+import { onSuccess, onFail } from './callbacks'
+import { requestContentType, parseContentType } from './content_type'
 import { filterParams } from './url'
 import { log } from '../debug'
 
@@ -40,14 +40,14 @@ function stamp(resp, key, value) {
 }
 
 function proxy(callback, ...args) {
-  return function(resp) {
+  return (resp) => {
     callback(resp, ...args)
     return resp
   }
 }
 
 function initHeader(headers, type) {
-  return new Headers({ ...headers, ...contentType.request(type) })
+  return new Headers({ ...headers, ...requestContentType(type) })
 }
 
 function initBody(body, type) {
@@ -61,8 +61,8 @@ function initRequest(url, { headers, body, type, ...options }) {
 }
 
 function initAction(request, { type, priority }, version) {
-  return function(resolve, reject) {
-    return function(conditions) {
+  return (resolve, reject) => {
+    return (conditions) => {
       if (shouldSkip(conditions, version)) {
         logAction('SKIPPED', version, priority)
         return reject({ status: SKIP_STATUS })
@@ -75,7 +75,7 @@ function initAction(request, { type, priority }, version) {
         .then(proxy(shouldCancel, conditions, version, priority, reject))
         .then(proxy(version.received))
         .then(proxy(stamp, STAMP_KEY, version))
-        .then(contentType.parse(type))
+        .then(parseContentType(type))
         .then(resolve)
         .catch(reject)
     }
@@ -83,7 +83,7 @@ function initAction(request, { type, priority }, version) {
 }
 
 function initExecute(func, conditions) {
-  return function() { return func(conditions) }
+  return () => func(conditions)
 }
 
 class Ajax {
@@ -113,11 +113,11 @@ class Ajax {
   }
 
   fail(callback) {
-    return this.then(callbacks.onFail(callback))
+    return this.then(onFail(callback))
   }
 
   success(callback) {
-    return this.then(callbacks.onSuccess(callback))
+    return this.then(onSuccess(callback))
   }
 
   then(callback) {
