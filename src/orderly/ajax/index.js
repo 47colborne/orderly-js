@@ -1,12 +1,21 @@
-
 import callbacks from './callbacks'
 import contentType from './content_type'
 import { filterParams } from './url'
+import { log } from '../debug'
 
 import Version from './version'
 
-const SKIP_STATUS = { status: 'skipped' }
-const CANCEL_STATUS = { status: 'cancelled' }
+const SKIP_STATUS = 'skipped'
+const CANCEL_STATUS = 'cancelled'
+const STAMP_KEY = '_v'
+
+function logAction(action, version, priority) {
+  log('Ajax', action, {
+    id: version.id,
+    key: version.key,
+    priority
+  })
+}
 
 function someConditionMet(conditions, value) {
   return conditions.some(condition => condition(value))
@@ -18,9 +27,14 @@ function shouldSkip(conditions, version) {
 
 function shouldCancel(resp, conditions, version, reject) {
   if (someConditionMet(conditions, resp) || version.receivedIsOutdated()) {
-    resp = { ...resp, ...CANCEL_STATUS }
+    logAction('CANCELLED', version, priority)
+    resp = { ...resp, status: CANCEL_STATUS }
     return reject(resp)
   }
+}
+
+function stamp(resp, key, value) {
+  { resp[key] = value }
 }
 
 function proxy(callback, ...args) {
@@ -41,22 +55,24 @@ function initBody(body, type) {
 function initRequest(url, { headers, body, type, ...options }) {
   headers = initHeader(headers, type)
   body = initBody(body, type)
-  options = { ...options, headers, body }
-
   return new Request(url, { ...options, headers, body })
 }
 
-function initAction(request, { type }, version) {
+function initAction(request, { type, priority }, version) {
   return function(resolve, reject) {
     return function(conditions) {
-      if (shouldSkip(conditions, version))
-        return reject(SKIP_STATUS)
+      if (shouldSkip(conditions, version)) {
+        logAction('SKIPPED', version, priority)
+        return reject({ status: SKIP_STATUS })
+      }
 
       version.sent()
+      logAction('SENT', version, priority)
+
       return fetch(request)
         .then(proxy(shouldCancel, conditions, version, reject))
         .then(proxy(version.received))
-        .then(proxy((resp) => resp.version = version))
+        .then(proxy(stamp, STAMP_KEY, version.toString()))
         .then(contentType.parse(type))
         .then(resolve)
         .catch(reject)
@@ -80,6 +96,8 @@ class Ajax {
       action = action(resolve, reject)
       this.execute = initExecute(action, this.conditions)
     })
+
+    logAction('CREATED', version, options.priority)
   }
 
   cancel(callback) {
@@ -104,7 +122,6 @@ class Ajax {
     this.q = this.q.then(callback)
     return this
   }
-
 }
 
 export default Ajax

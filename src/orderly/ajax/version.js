@@ -14,14 +14,14 @@ class Version {
     return this.get(key).counter += 1
   }
 
-  constructor(key, willOutdated) {
-    this.willOutdated = willOutdated !== undefined ? willOutdated : true
+  constructor(key, check) {
+    this.check = check !== undefined ? check : true
     this.key = key
     this.id = Version.inc(key)
   }
 
   keyIsOyutdated(key) {
-    return this.willOutdated && Version.get(this.key)[key] > this.id
+    return this.check && Version.get(this.key)[key] > this.id
   }
 
   sentIsOutdated = () => {

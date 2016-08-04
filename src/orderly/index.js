@@ -1,9 +1,9 @@
 import { setMode } from './debug'
 
-import Ajax from './orderly/ajax'
-import Job from './orderly/job'
-import Queue from './orderly/queue'
-import Worker from './orderly/worker'
+import Ajax from './ajax'
+import Job from './job'
+import Queue from './queue'
+import Worker from './worker'
 
 function Orderly({ debug, max, sleep } = {}) {
 
@@ -22,9 +22,12 @@ function Orderly({ debug, max, sleep } = {}) {
   // PUBLIC INTERFACE
   // ============================================
 
-  function ajax(url, { priority, ...options } = {}) {
+  function ajax(url, options = {}) {
     let req = new Ajax(url, options)
-    let job = new Job({ action: req.execute, priority })
+    let job = new Job({
+      action: req.execute,
+      priority: options.priority
+    })
 
     queue.add(job)
 

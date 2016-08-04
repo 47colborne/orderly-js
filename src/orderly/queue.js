@@ -1,5 +1,5 @@
 import FastPriorityQueue from 'fastpriorityqueue'
-import { log } from '../debug'
+import { log } from './debug'
 
 function defaultStrategy({ priority: x }, { priority: y }) {
   return x !== undefined && x > y
@@ -13,12 +13,13 @@ class Queue {
 
   add(obj) {
     if (typeof obj === 'object' && typeof obj.action === 'function') {
-      return this.queue.add(obj)
+      this.queue.add(obj)
+      return obj
     }
   }
 
   get() {
-    log('Queue', 'get', `size: ${ this.size }`)
+    log('Queue', 'getting a job', { size: this.size })
     return this.queue.poll()
   }
 

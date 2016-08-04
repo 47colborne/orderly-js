@@ -7,7 +7,7 @@ function randomPriority() {
   return Math.floor(Math.random() * 10)
 }
 
-function randomTimeout(base = 0, variance = 10) {
+function randomInt(base = 0, variance = 10) {
   return Math.floor(Math.random() * variance) + base
 }
 
@@ -31,28 +31,30 @@ let randomPriorities = new Array(100)
 //        .then(resp => console.log('complete', resp.version))
 //        .catch(err => console.log('ERROR!!!', err))
 
-//     }, randomTimeout())
+//     }, randomInt())
 
 //   })
 
-// }, randomTimeout())
+// }, randomInt())
 
 setTimeout(() => {
   randomPriorities.forEach((priority, index) => {
     setTimeout(() => {
 
       o.get('https://api.github.com/users', {
-        type: 'json'
+        type: 'json',
+        priority: randomInt(1, 10)
       })
-       .cancel(resp => false)
-       .then(resp => console.log('complete', resp.version))
-       .catch(err => console.log('ERROR!!!', err))
+       // .cancel(resp => false)
+       .success(resp => {})
+       .fail(resp => {})
+       .catch(err => {})
 
-    }, randomTimeout(0, 2000))
+    }, randomInt(0, 2000))
 
   })
 
-}, randomTimeout())
+}, randomInt())
 
 
 // VERSIONED CASE
@@ -68,11 +70,11 @@ setTimeout(() => {
 //       })
 //        .then(resp => console.log('complete'))
 //        .catch(err => console.log(err))
-//     }, randomTimeout(0, 2000))
+//     }, randomInt(0, 2000))
 
 //   })
 
-// }, randomTimeout())
+// }, randomInt())
 
 // CANCALLED CASE
 // ==============================================
@@ -92,9 +94,9 @@ setTimeout(() => {
 //       })
 //        .then(resp => console.log('complete'))
 //        .catch(err => console.log(err))
-//     }, randomTimeout(0, 2000))
+//     }, randomInt(0, 2000))
 
 //   })
 
-// }, randomTimeout())
+// }, randomInt())
 

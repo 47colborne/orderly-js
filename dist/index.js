@@ -63,143 +63,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 	
-	module.exports = __webpack_require__(2);
+	module.exports = __webpack_require__(14);
 
 /***/ },
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-	
-	var _debug = __webpack_require__(3);
-	
-	var _ajax = __webpack_require__(4);
-	
-	var _ajax2 = _interopRequireDefault(_ajax);
-	
-	var _job = __webpack_require__(9);
-	
-	var _job2 = _interopRequireDefault(_job);
-	
-	var _queue = __webpack_require__(10);
-	
-	var _queue2 = _interopRequireDefault(_queue);
-	
-	var _worker = __webpack_require__(13);
-	
-	var _worker2 = _interopRequireDefault(_worker);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-	
-	function Orderly() {
-	  var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	
-	  var debug = _ref.debug;
-	  var max = _ref.max;
-	  var sleep = _ref.sleep;
-	
-	
-	  // ============================================
-	  // SET DEBUG MODE
-	  // ============================================
-	  (0, _debug.setMode)(debug);
-	
-	  // ============================================
-	  // INITIALIZE QUEUE AND WORKER
-	  // ============================================
-	  var queue = new _queue2.default();
-	  var worker = new _worker2.default(queue, { max: max, sleep: sleep });
-	
-	  // ============================================
-	  // PUBLIC INTERFACE
-	  // ============================================
-	
-	  function ajax(url) {
-	    var _ref2 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	
-	    var priority = _ref2.priority;
-	
-	    var options = _objectWithoutProperties(_ref2, ['priority']);
-	
-	    var req = new _ajax2.default(url, options);
-	    var job = new _job2.default({ action: req.execute, priority: priority });
-	
-	    queue.add(job);
-	
-	    return req;
-	  }
-	
-	  function get(url) {
-	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	
-	    return ajax(url, _extends({}, options, { method: 'GET' }));
-	  }
-	
-	  function post(url) {
-	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	
-	    return ajax(url, _extends({}, options, { method: 'POST' }));
-	  }
-	
-	  function put(url) {
-	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	
-	    return ajax(url, _extends({}, options, { method: 'PUT' }));
-	  }
-	
-	  function del(url) {
-	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	
-	    return ajax(url, _extends({}, options, { method: 'DELETE' }));
-	  }
-	
-	  return { ajax: ajax, get: get, post: post, put: put, del: del, queue: queue, worker: worker };
-	}
-	
-	exports.default = Orderly;
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	var mode = false;
-	
-	function setMode(boolean) {
-	  return mode = boolean;
-	}
-	
-	function getMode() {
-	  return mode;
-	}
-	
-	function log(klass, action) {
-	  var _console;
-	
-	  for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
-	    args[_key - 2] = arguments[_key];
-	  }
-	
-	  if (mode) (_console = console).log.apply(_console, ["Orderly." + klass + " - " + action + " -"].concat(args));
-	}
-	
-	exports.setMode = setMode;
-	exports.getMode = getMode;
-	exports.log = log;
-
-/***/ },
+/* 2 */,
+/* 3 */,
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -223,6 +91,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _url = __webpack_require__(7);
 	
+	var _debug = __webpack_require__(15);
+	
 	var _version = __webpack_require__(8);
 	
 	var _version2 = _interopRequireDefault(_version);
@@ -233,8 +103,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
-	var SKIP_STATUS = { status: 'skipped' };
-	var CANCEL_STATUS = { status: 'cancelled' };
+	var SKIP_STATUS = 'skipped';
+	var CANCEL_STATUS = 'cancelled';
+	var STAMP_KEY = '_v';
+	
+	function logAction(action, version, priority) {
+	  (0, _debug.log)('Ajax', action, {
+	    id: version.id,
+	    key: version.key,
+	    priority: priority
+	  });
+	}
 	
 	function someConditionMet(conditions, value) {
 	  return conditions.some(function (condition) {
@@ -248,8 +127,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function shouldCancel(resp, conditions, version, reject) {
 	  if (someConditionMet(conditions, resp) || version.receivedIsOutdated()) {
-	    resp = _extends({}, resp, CANCEL_STATUS);
+	    logAction('CANCELLED', version, priority);
+	    resp = _extends({}, resp, { status: CANCEL_STATUS });
 	    return reject(resp);
+	  }
+	}
+	
+	function stamp(resp, key, value) {
+	  {
+	    resp[key] = value;
 	  }
 	}
 	
@@ -281,22 +167,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  headers = initHeader(headers, type);
 	  body = initBody(body, type);
-	  options = _extends({}, options, { headers: headers, body: body });
-	
 	  return new Request(url, _extends({}, options, { headers: headers, body: body }));
 	}
 	
 	function initAction(request, _ref2, version) {
 	  var type = _ref2.type;
+	  var priority = _ref2.priority;
 	
 	  return function (resolve, reject) {
 	    return function (conditions) {
-	      if (shouldSkip(conditions, version)) return reject(SKIP_STATUS);
+	      if (shouldSkip(conditions, version)) {
+	        logAction('SKIPPED', version, priority);
+	        return reject({ status: SKIP_STATUS });
+	      }
 	
 	      version.sent();
-	      return fetch(request).then(proxy(shouldCancel, conditions, version, reject)).then(proxy(version.received)).then(proxy(function (resp) {
-	        return resp.version = version;
-	      })).then(_content_type2.default.parse(type)).then(resolve).catch(reject);
+	      logAction('SENT', version, priority);
+	
+	      return fetch(request).then(proxy(shouldCancel, conditions, version, reject)).then(proxy(version.received)).then(proxy(stamp, STAMP_KEY, version.toString())).then(_content_type2.default.parse(type)).then(resolve).catch(reject);
 	    };
 	  };
 	}
@@ -329,6 +217,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      action = action(resolve, reject);
 	      _this.execute = initExecute(action, _this.conditions);
 	    });
+	
+	    logAction('CREATED', version, options.priority);
 	  }
 	
 	  _createClass(Ajax, [{
@@ -511,12 +401,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	var Version = function () {
-	  function Version(key, willOutdated) {
+	  function Version(key, check) {
 	    _classCallCheck(this, Version);
 	
 	    _initialiseProps.call(this);
 	
-	    this.willOutdated = willOutdated !== undefined ? willOutdated : true;
+	    this.check = check !== undefined ? check : true;
 	    this.key = key;
 	    this.id = Version.inc(key);
 	  }
@@ -524,7 +414,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _createClass(Version, [{
 	    key: 'keyIsOyutdated',
 	    value: function keyIsOyutdated(key) {
-	      return this.willOutdated && Version.get(this.key)[key] > this.id;
+	      return this.check && Version.get(this.key)[key] > this.id;
 	    }
 	  }]);
 	
@@ -571,7 +461,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 9 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	'use strict';
 	
@@ -580,8 +470,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _debug = __webpack_require__(3);
 	
 	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 	
@@ -604,8 +492,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.action = action;
 	    this.priority = priority;
 	    this.options = options;
-	
-	    (0, _debug.log)('Job', 'constructed', this);
 	  }
 	
 	  _createClass(Job, [{
@@ -617,12 +503,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	          while (1) {
 	            switch (_context.prev = _context.next) {
 	              case 0:
-	                (0, _debug.log)('Job', 'executing', this);
-	
-	                _context.next = 3;
+	                _context.next = 2;
 	                return this.action();
 	
-	              case 3:
+	              case 2:
 	                result = _context.sent;
 	
 	                if (callback && typeof callback === 'function') {
@@ -631,7 +515,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	                return _context.abrupt('return', result);
 	
-	              case 6:
+	              case 5:
 	              case 'end':
 	                return _context.stop();
 	            }
@@ -670,7 +554,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _fastpriorityqueue2 = _interopRequireDefault(_fastpriorityqueue);
 	
-	var _debug = __webpack_require__(3);
+	var _debug = __webpack_require__(15);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -701,13 +585,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: 'add',
 	    value: function add(obj) {
 	      if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object' && typeof obj.action === 'function') {
-	        return this.queue.add(obj);
+	        this.queue.add(obj);
+	        return obj;
 	      }
 	    }
 	  }, {
 	    key: 'get',
 	    value: function get() {
-	      (0, _debug.log)('Queue', 'get', 'size: ' + this.size);
+	      (0, _debug.log)('Queue', 'getting a job', { size: this.size });
 	      return this.queue.poll();
 	    }
 	  }, {
@@ -996,6 +881,146 @@ return /******/ (function(modules) { // webpackBootstrap
 	}();
 	
 	exports.default = Worker;
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
+	var _debug = __webpack_require__(15);
+	
+	var _ajax = __webpack_require__(4);
+	
+	var _ajax2 = _interopRequireDefault(_ajax);
+	
+	var _job = __webpack_require__(9);
+	
+	var _job2 = _interopRequireDefault(_job);
+	
+	var _queue = __webpack_require__(10);
+	
+	var _queue2 = _interopRequireDefault(_queue);
+	
+	var _worker = __webpack_require__(13);
+	
+	var _worker2 = _interopRequireDefault(_worker);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function Orderly() {
+	  var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	
+	  var debug = _ref.debug;
+	  var max = _ref.max;
+	  var sleep = _ref.sleep;
+	
+	
+	  // ============================================
+	  // SET DEBUG MODE
+	  // ============================================
+	  (0, _debug.setMode)(debug);
+	
+	  // ============================================
+	  // INITIALIZE QUEUE AND WORKER
+	  // ============================================
+	  var queue = new _queue2.default();
+	  var worker = new _worker2.default(queue, { max: max, sleep: sleep });
+	
+	  // ============================================
+	  // PUBLIC INTERFACE
+	  // ============================================
+	
+	  function ajax(url) {
+	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	    var req = new _ajax2.default(url, options);
+	    var job = new _job2.default({
+	      action: req.execute,
+	      priority: options.priority
+	    });
+	
+	    queue.add(job);
+	
+	    return req;
+	  }
+	
+	  function get(url) {
+	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	    return ajax(url, _extends({}, options, { method: 'GET' }));
+	  }
+	
+	  function post(url) {
+	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	    return ajax(url, _extends({}, options, { method: 'POST' }));
+	  }
+	
+	  function put(url) {
+	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	    return ajax(url, _extends({}, options, { method: 'PUT' }));
+	  }
+	
+	  function del(url) {
+	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	    return ajax(url, _extends({}, options, { method: 'DELETE' }));
+	  }
+	
+	  return { ajax: ajax, get: get, post: post, put: put, del: del, queue: queue, worker: worker };
+	}
+	
+	exports.default = Orderly;
+
+/***/ },
+/* 15 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	
+	var mode = false;
+	
+	function setMode(boolean) {
+	  return mode = boolean;
+	}
+	
+	function getMode() {
+	  return mode;
+	}
+	
+	function log(klass, action) {
+	  var args = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+	
+	  if (mode) {
+	    var msg = Object.keys(args).reduce(function (msg, key) {
+	      var value = args[key];
+	      if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') value = JSON.stringify(value);
+	      return msg + ' ' + key + ':' + value;
+	    }, '<Orderly.' + klass);
+	
+	    msg += '> ' + action;
+	
+	    console.log(msg);
+	  }
+	}
+	
+	exports.setMode = setMode;
+	exports.getMode = getMode;
+	exports.log = log;
 
 /***/ }
 /******/ ])
