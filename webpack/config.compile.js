@@ -25,13 +25,14 @@ const CONFIG = {
       excludes: ['node_modules']
     }]
   },
-  devtool: 'source-map',
+  devtool: 'cheap-module-source-map',
   plugins: []
 }
 
 if (process.env.NODE_ENV === 'compile') {
   CONFIG.plugins = [
-    new webpack.optimize.UglifyJsPlugin({ minimize: true })
+    new webpack.optimize.DedupePlugin(),
+    new webpack.optimize.UglifyJsPlugin()
   ]
 }
 
