@@ -2,15 +2,11 @@ function bodyContainsJson(resp) {
   return resp._bodyBlob.type.includes('application/json')
 }
 
-function responseContentType(type) {
-  return async function(resp) {
-    if (type) {
-      resp.data = await resp[type]()
-    } else if (bodyContainsJson(resp)) {
-      resp.data = await resp.json()
-    }
-
-    return resp
+async function responseContentType(resp, type) {
+  if (type) {
+    resp.data = await resp[type]()
+  } else if (bodyContainsJson(resp)) {
+    resp.data = await resp.json()
   }
 }
 

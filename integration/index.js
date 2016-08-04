@@ -28,7 +28,7 @@ setTimeout(() => {
         // version: false
       })
        .cancel(resp => false)
-       .success(resp => console.log('COMPLETE', resp._v))
+       .success(resp => console.log('COMPLETE', resp))
        .catch(err => console.log('ERROR!!!', err))
 
     }, randomInt())
