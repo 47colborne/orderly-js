@@ -1,0 +1,11 @@
+{
+  "name": "orderly-demo-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --hot --inline --content-base ./public"
+  },
+  "author": "Scott Chu",
+  "license": "MIT"
+}
