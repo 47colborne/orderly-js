@@ -11,7 +11,7 @@ class Queue {
   }
 
   add(obj) {
-    if (typeof obj === 'object' && typeof obj.action === 'function') {
+    if (typeof obj === 'object' && typeof obj.execute === 'function') {
       this.queue.add(obj)
       return obj
     } else {

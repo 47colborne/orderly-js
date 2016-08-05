@@ -15,4 +15,18 @@ class Job {
   }
 }
 
+
+// function Job({ action, priority = 0 } = {}) {
+//   let execute = async function(callback)  {
+//     let result = await action()
+//     if (callback && typeof callback === 'function')
+//       callback(result)
+
+//     return result
+//   }
+
+//   return { priority, execute }
+// }
+
+
 export default Job

@@ -6,10 +6,27 @@ let Worker = lib.src('orderly/worker')
 
 describe('Worker', function() {
 
-  // let queue = new Queue()
+  // let worker = new Worker(new Queue)
 
+  // beforeEach(function() {
+  //   this.clock = sinon.useFakeTimers()
+  // })
 
+  // afterEach(function() {
+  //   // worker = new Worker(new Queue)
+  //   this.clock.restore
+  // })
 
+  // describe('on initialize', function() {
+  //   it('starts polling', function() {
+  //     // let spy = sinon.spy()
+  //     Worker.__set__('start', () => { console.log('wasup') })
+
+  //     let worker = new Worker(new Queue)
+  //     worker.start()
+  //     // expect(spy).to.have.been.called
+  //   })
+  // })
 
 
   // describe('start', function() {
