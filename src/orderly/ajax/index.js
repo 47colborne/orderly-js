@@ -2,7 +2,6 @@ import { onSuccess, onFail, proxy } from './callbacks'
 import { parseResponse, requestContentType } from './content_type'
 import { filterParams } from './url'
 import { log } from '../debug'
-import 'whatwg-fetch'
 
 import Version from './version'
 
