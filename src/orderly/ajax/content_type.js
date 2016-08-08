@@ -7,14 +7,6 @@ function bodyContainsJson(resp) {
   return ct && ct.includes(MIME_TYPE.json)
 }
 
-async function responseContentType(resp, type) {
-  if (type) {
-    resp.data = await resp[type]()
-  } else if (bodyContainsJson(resp)) {
-    resp.data = await resp.json()
-  }
-}
-
 function accepts(type) {
   if (type === 'json') return { 'Accept': MIME_TYPE.json }
 }
@@ -29,4 +21,4 @@ function requestContentType(body, type) {
   return Object.assign({}, accepts(type), contentType(body, type))
 }
 
-export { bodyContainsJson, responseContentType, requestContentType }
+export { bodyContainsJson, requestContentType }
