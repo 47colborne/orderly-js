@@ -1,4 +1,5 @@
 import Orderly from '../../dist'
+import 'whatwg-fetch'
 
 let o = Orderly({ debug: true })
 

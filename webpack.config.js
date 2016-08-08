@@ -38,7 +38,14 @@ const CONFIG = {
 if (process.env.NODE_ENV === 'compile') {
   CONFIG.plugins = [
     new webpack.optimize.DedupePlugin(),
-    new webpack.optimize.UglifyJsPlugin()
+    new webpack.optimize.UglifyJsPlugin({
+      comments: false,
+      compress: { warnings: false },
+      mangle: {
+        screw_ie8: true,
+        keep_fnames: true
+      }
+    })
   ]
 }
 
