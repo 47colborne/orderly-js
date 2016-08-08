@@ -17,8 +17,8 @@ function anyConditionMet(conditions, ...args) {
   return conditions.some(condition => condition(...args))
 }
 
-function shouldSkip(conditions, version) {
-  return anyConditionMet(conditions) || version.sentIsOutdated()
+function shouldSkip(skip, conditions, version) {
+  return skip !== false && (anyConditionMet(conditions) || version.sentIsOutdated())
 }
 
 function shouldCancel(resp, conditions, version, priority, reject) {
@@ -35,24 +35,24 @@ function insertVersion(resp, key, value) {
   resp[key] = value
 }
 
-function initHeader(headers, type) {
-  return new Headers({ ...headers, ...requestContentType(type) })
+function initHeader(headers, body, type) {
+  return new Headers({ ...headers, ...requestContentType(body, type) })
 }
 
 function initBody(body, type) {
-  return body && type === 'json' ? JSON.stringify(body) : body
+  return body && (typeof body === 'object' || type === 'json') ? JSON.stringify(body) : body
 }
 
 function initRequest(url, { headers, body, type, ...options }) {
-  headers = initHeader(headers, type)
+  headers = initHeader(headers, body, type)
   body = initBody(body, type)
   return new Request(url, { ...options, headers, body })
 }
 
-function initAction(request, { type, priority }, version) {
+function initAction(request, { type, priority, skip }, version) {
   return function actionWithoutPromise(resolve, reject) {
     return function action(conditions) {
-      if (shouldSkip(conditions, version)) {
+      if (shouldSkip(skip, conditions, version)) {
         logAction('SKIPPED', version, priority)
         return reject({ status: SKIP_STATUS })
       }
