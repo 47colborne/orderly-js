@@ -1,17 +1,28 @@
 import FastPriorityQueue from 'fastpriorityqueue'
 import { log } from './debug'
 
-function defaultStrategy({ priority: x }, { priority: y }) {
-  return y === undefined || x > y
+function defaultStrategy(
+  { priority: p1 = 0, queueId: qId1 },
+  { priority: p2 = 0, queueId: qId2 }
+) {
+
+  return p2 < p1 || qId2 > qId1
 }
 
 class Queue {
+  static counter = 0
+
+  static inc = function() {
+    return this.counter += 1
+  }
+
   constructor({ strategy = defaultStrategy } = {}) {
     this.queue = new FastPriorityQueue(strategy)
   }
 
   add(obj) {
     if (typeof obj === 'object' && typeof obj.execute === 'function') {
+      obj.order = Queue.inc()
       this.queue.add(obj)
       return obj
     } else {

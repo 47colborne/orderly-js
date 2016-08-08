@@ -27,6 +27,23 @@ describe('Queue', function() {
   })
 
   describe('#get', function() {
+    it('behaves like FIFO queue with same priority', function() {
+      let job1 = stubJob(0)
+      let job2 = stubJob(0)
+      let job3 = stubJob(0)
+      let job4 = stubJob(0)
+
+      queue.add(job1)
+      queue.add(job2)
+      queue.add(job3)
+      queue.add(job4)
+
+      expect(queue.get()).to.eq(job1)
+      expect(queue.get()).to.eq(job2)
+      expect(queue.get()).to.eq(job3)
+      expect(queue.get()).to.eq(job4)
+    })
+
     it('returns a job with any priority first', function() {
       let noPriorityJob = stubJob(undefined)
       let highPriorityJob = stubJob(10)

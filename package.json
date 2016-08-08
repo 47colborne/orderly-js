@@ -1,6 +1,6 @@
 {
   "name": "orderly-js",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Simple Ajax Priority Queue with the request versioning and aborting",
   "main": "./dist/index.js",
   "scripts": {

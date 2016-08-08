@@ -15,8 +15,5 @@ describe('Job', function() {
 
       })
     })
-
   })
-
-
 })
