@@ -1,5 +1,5 @@
 import { onSuccess, onFail, proxy } from './callbacks'
-import { requestContentType, bodyContainsJson } from './content_type'
+import { parseResponse, requestContentType } from './content_type'
 import { filterParams } from './url'
 import { log } from '../debug'
 
@@ -64,16 +64,8 @@ function initAction(request, { type, priority, skip }, version) {
         .then(proxy(shouldCancel, conditions, version, priority, reject))
         .then(proxy(version.received))
         .then(proxy(insertVersion, STAMP_KEY, version))
-        .then(function(resp) {
-          if (!type && bodyContainsJson(resp))
-            type = 'json'
-
-          resp[type]().then(function(data) {
-            resp.data = data
-            resolve(resp)
-          }).catch(reject)
-        }).catch(reject)
-
+        .then(parseResponse(type, resolve, reject))
+        .catch(reject)
     }
   }
 }
