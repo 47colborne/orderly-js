@@ -1,6 +1,6 @@
 {
   "name": "orderly-js",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Simple Ajax Priority Queue with the request versioning and aborting",
   "main": "./dist/index.js",
   "scripts": {
@@ -21,10 +21,10 @@
     "mocha": "^3.0.2",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
-    "webpack": "^1.13.1",
-    "whatwg-fetch": "^1.0.0"
+    "webpack": "^1.13.1"
   },
   "dependencies": {
-    "fastpriorityqueue": "^0.1.0"
+    "fastpriorityqueue": "^0.1.0",
+    "whatwg-fetch": "^1.0.0"
   }
 }

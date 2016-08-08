@@ -19,7 +19,6 @@ function parseResponse(type, resolve, reject) {
   }
 }
 
-
 function accepts(type) {
   if (type === 'json') return { 'Accept': MIME_TYPE.json }
 }

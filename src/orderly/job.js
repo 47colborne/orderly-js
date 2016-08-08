@@ -5,28 +5,15 @@ class Job {
     this.options = options
   }
 
-  execute = async (callback) => {
-    let result = await this.action()
+  execute = (callback) => {
+    let r = this.action()
+
     if (callback && typeof callback === 'function') {
-      callback(result)
+      r = (r && r instanceof Promise) ? r.then(callback) : callback(r)
     }
 
-    return result
+    return r
   }
 }
-
-
-// function Job({ action, priority = 0 } = {}) {
-//   let execute = async function(callback)  {
-//     let result = await action()
-//     if (callback && typeof callback === 'function')
-//       callback(result)
-
-//     return result
-//   }
-
-//   return { priority, execute }
-// }
-
 
 export default Job

@@ -2,6 +2,7 @@ import { onSuccess, onFail, proxy } from './callbacks'
 import { parseResponse, requestContentType } from './content_type'
 import { filterParams } from './url'
 import { log } from '../debug'
+import 'whatwg-fetch'
 
 import Version from './version'
 
@@ -36,7 +37,7 @@ function insertVersion(resp, key, value) {
 }
 
 function initHeader(headers, body, type) {
-  return new Headers({ ...headers, ...requestContentType(body, type) })
+  return { ...headers, ...requestContentType(body, type) }
 }
 
 function initBody(body, type) {
@@ -46,10 +47,10 @@ function initBody(body, type) {
 function initRequest(url, { headers, body, type, ...options }) {
   headers = initHeader(headers, body, type)
   body = initBody(body, type)
-  return new Request(url, { ...options, headers, body })
+  return { ...options, headers, body }
 }
 
-function initAction(request, { type, priority, skip }, version) {
+function initAction(url, request, { type, priority, skip }, version) {
   return function actionWithoutPromise(resolve, reject) {
     return function action(conditions) {
       if (shouldSkip(skip, conditions, version)) {
@@ -60,7 +61,7 @@ function initAction(request, { type, priority, skip }, version) {
       version.sent()
       logAction('SENT', version, priority)
 
-      return fetch(request)
+      return fetch(url, request)
         .then(proxy(shouldCancel, conditions, version, priority, reject))
         .then(proxy(version.received))
         .then(proxy(insertVersion, STAMP_KEY, version))
@@ -79,7 +80,7 @@ class Ajax {
     version = new Version(filterParams(url), version)
 
     let request = initRequest(url, options)
-    let action = initAction(request, options, version)
+    let action = initAction(url, request, options, version)
 
     this.conditions = []
     this.q = new Promise((resolve, reject) => {
