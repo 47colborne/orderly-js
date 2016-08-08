@@ -6,7 +6,7 @@ function defaultStrategy(
   { priority: p2 = 0, queueId: qId2 }
 ) {
 
-  return p2 < p1 || qId2 > qId1
+  return (p1 === p2 && qId2 > qId1) || (p2 < p1)
 }
 
 class Queue {
@@ -22,7 +22,7 @@ class Queue {
 
   add(obj) {
     if (typeof obj === 'object' && typeof obj.execute === 'function') {
-      obj.order = Queue.inc()
+      obj.queueId = Queue.inc()
       this.queue.add(obj)
       return obj
     } else {

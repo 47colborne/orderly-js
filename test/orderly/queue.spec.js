@@ -47,19 +47,29 @@ describe('Queue', function() {
     it('returns a job with any priority first', function() {
       let noPriorityJob = stubJob(undefined)
       let highPriorityJob = stubJob(10)
+
       queue.add(noPriorityJob)
       queue.add(highPriorityJob)
 
       expect(queue.get()).to.eq(highPriorityJob)
+      expect(queue.get()).to.eq(noPriorityJob)
     })
 
     it('returns a job with highest priority first', function() {
-      let lowPriorityJob = stubJob(1)
-      let highPriorityJob = stubJob(10)
-      queue.add(lowPriorityJob)
-      queue.add(highPriorityJob)
+      let lowPriorityJob = stubJob(0)
+      let midPriorityJob = stubJob(5)
+      let highPriorityJob1 = stubJob(10)
+      let highPriorityJob2 = stubJob(10)
 
-      expect(queue.get()).to.eq(highPriorityJob)
+      queue.add(lowPriorityJob)
+      queue.add(midPriorityJob)
+      queue.add(highPriorityJob1)
+      queue.add(highPriorityJob2)
+
+      expect(queue.get()).to.eq(highPriorityJob1)
+      expect(queue.get()).to.eq(highPriorityJob2)
+      expect(queue.get()).to.eq(midPriorityJob)
+      expect(queue.get()).to.eq(lowPriorityJob)
     })
 
     context('when queue is empty', function() {
