@@ -14,34 +14,30 @@ class Version {
     return this.get(key).counter += 1
   }
 
-  constructor(key, check) {
-    this.check = check !== undefined ? check : true
+  constructor(key, check = true) {
+    this.check = check
     this.key = key
     this.id = Version.inc(key)
   }
 
-  keyIsOyutdated(key) {
-    return this.check && Version.get(this.key)[key] > this.id
-  }
-
   sentIsOutdated = () => {
-    return this.keyIsOyutdated('sent')
+    return this.check && Version.get(this.key)['sent'] > this.id
   }
 
   receivedIsOutdated = () => {
-    return this.keyIsOyutdated('received')
+    return this.check && Version.get(this.key)['received'] > this.id
   }
 
   sent = () => {
     let versionForKey = Version.get(this.key)
-    if (versionForKey.sent < this.id) {
+    if (this.id > versionForKey.sent) {
       return versionForKey.sent = this.id
     }
   }
 
   received = () => {
     let versionForKey = Version.get(this.key)
-    if (versionForKey.received < this.id) {
+    if (this.id > versionForKey.received) {
       return versionForKey.received = this.id
     }
   }
