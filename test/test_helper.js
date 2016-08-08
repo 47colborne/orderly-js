@@ -6,10 +6,10 @@ import sinonChail from 'sinon-chai'
 chai.use(sinonChail)
 
 // path helper functions
-import path from 'path'
+import path, { join } from 'path'
 
-let lib = (p) => require(path.join(__dirname, '..', p)).default
-lib.src = (p) => lib(path.join('src', p))
+let lib = (p) => require(join(__dirname, '..', p))
+lib.src = (p) => lib(join('src', p))
 
 // require and setup jsdom
 let jsdom = require('jsdom')

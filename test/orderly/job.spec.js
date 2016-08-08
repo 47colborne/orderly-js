@@ -1,6 +1,6 @@
 import { assert, expect, lib, sinon } from '../test_helper'
 
-let Job = lib.src('orderly/job')
+let Job = lib.src('orderly/job').default
 
 describe('Job', function() {
 

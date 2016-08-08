@@ -1,6 +1,6 @@
 import { assert, expect, lib, sinon } from '../../test_helper'
 
-let Version = lib.src('orderly/ajax/version')
+let Version = lib.src('orderly/ajax/version').default
 
 describe('Ajax Version', function() {
   afterEach(function() { Version.map = {} })
