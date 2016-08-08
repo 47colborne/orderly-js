@@ -1,6 +1,3 @@
-let register = require('babel-register')
-register({ plugins: ['rewire'] })
-
 // require and setup chai
 import chai, { assert, expect } from 'chai'
 import sinon from 'sinon'

@@ -3,7 +3,7 @@
 let path = require('path')
 let webpack = require('webpack')
 
-const PATH = (p) => path.join(__dirname, '..', p || '')
+const PATH = (p) => path.join(__dirname, p || '')
 
 const CONFIG = {
   context: PATH('src'),
@@ -23,10 +23,16 @@ const CONFIG = {
       loader: 'babel',
       includes: ['src'],
       excludes: ['node_modules']
+    }, {
+      test: /\.css$/,
+      loaders: ['style', 'css']
     }]
   },
   devtool: 'cheap-module-source-map',
-  plugins: []
+  resolve: {
+    extensions: ['', '.js'],
+    modulesDirectories: ["node_modules"]
+  }
 }
 
 if (process.env.NODE_ENV === 'compile') {

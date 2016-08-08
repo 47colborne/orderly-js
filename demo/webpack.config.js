@@ -1,9 +1,9 @@
 'use strict'
 
-let path = require('path')
+let resolve = require('path').resolve
 let webpack = require('webpack')
 
-const PATH = (p) => path.resolve(__dirname, '..', p || '')
+const PATH = (path) => resolve(__dirname, path || '')
 
 module.exports = {
   context: PATH('app'),
@@ -18,12 +18,11 @@ module.exports = {
     loaders: [{
       test: /\.js$/,
       loader: 'babel',
-      excludes: ['node_modules']
+      exclude: /(node_modules)/
     }]
   },
   devtool: 'cheap-source-map',
   devServer: {
-    contentBase: PATH('public'),
     hot: true,
     inline: true,
     stats: 'error-only'

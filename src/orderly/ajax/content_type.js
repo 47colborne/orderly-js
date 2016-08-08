@@ -1,5 +1,6 @@
 function bodyContainsJson(resp) {
-  return resp._bodyBlob.type.includes('application/json')
+  let ct = resp.headers.get('Content-Type')
+  return ct && ct.includes('application/json')
 }
 
 async function responseContentType(resp, type) {
