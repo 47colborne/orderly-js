@@ -4,7 +4,7 @@
   "description": "Simple Ajax Priority Queue with the request versioning and aborting",
   "main": "./dist/index.js",
   "scripts": {
-    "test": "node_modules/.bin/mocha -c -w test --compilers js:babel-core/register --require babel-polyfill -R progress $(find test -path '*_test*')",
+    "test": "node_modules/.bin/mocha -c -w test --compilers js:babel-core/register --require babel-polyfill -R progress $(find test -path '*.spec*')",
     "watch": "webpack --watch --color --progress",
     "compile": "NODE_ENV=compile webpack"
   },

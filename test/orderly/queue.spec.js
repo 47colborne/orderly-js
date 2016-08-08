@@ -4,8 +4,8 @@ let Queue = lib.src('orderly/queue')
 
 describe('Queue', function() {
 
-  function stubJob(priority, action = () => {}) {
-    return { priority, action }
+  function stubJob(priority, execute = () => {}) {
+    return { priority, execute }
   }
 
   let queue = new Queue()
