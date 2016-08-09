@@ -1,7 +1,7 @@
 import Orderly from '../../dist'
 import 'whatwg-fetch'
+import './test'
 
-let o = Orderly({ debug: true })
+let apiQ = Orderly.default.withOptions({ mode: 'cors', credentials: 'include' })
 
-o.get('http://jsonplaceholder.typicode.com/posts')
- .then((resp) => console.log(resp))
+console.log(apiQ)

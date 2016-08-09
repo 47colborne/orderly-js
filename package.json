@@ -4,7 +4,7 @@
   "description": "Simple Ajax Priority Queue with the request versioning and aborting",
   "main": "./dist/index.js",
   "scripts": {
-    "test": "node_modules/.bin/mocha -c -w test --compilers js:babel-core/register --require babel-polyfill -R progress $(find test -path '*.spec*')",
+    "test": "NODE_ENV=test node_modules/.bin/mocha -c -w test --compilers js:babel-core/register --require babel-polyfill -R progress $(find test -path '*.spec*')",
     "watch": "webpack --watch --color --progress",
     "compile": "NODE_ENV=compile webpack"
   },
@@ -19,12 +19,13 @@
     "chai": "^3.5.0",
     "jsdom": "^9.4.1",
     "mocha": "^3.0.2",
+    "node-fetch": "^1.6.0",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
-    "webpack": "^1.13.1"
+    "webpack": "^1.13.1",
+    "whatwg-fetch": "^1.0.0"
   },
   "dependencies": {
-    "fastpriorityqueue": "^0.1.0",
-    "whatwg-fetch": "^1.0.0"
+    "fastpriorityqueue": "^0.1.0"
   }
 }

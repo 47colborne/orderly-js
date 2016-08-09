@@ -5,25 +5,65 @@ import Job from './job'
 import Queue from './queue'
 import Worker from './worker'
 
-function Orderly({ debug, max, sleep } = {}) {
+
+
+class Orderly {
 
   // ============================================
   // SET DEBUG MODE
   // ============================================
-  setMode(debug)
+
+  static setMode = setMode
 
   // ============================================
-  // INITIALIZE QUEUE AND WORKER
+  // CLASS SHARED VERIABLES
   // ============================================
-  let queue = new Queue
-  let worker = new Worker(queue, { max, sleep })
+
+  static queue = undefined
+
+  static worker = undefined
+
+  static global = undefined
+
+  // ============================================
+  // CLASS FUNCTIONS
+  // ============================================
+
+  static start = function({ max, sleep } = {}) {
+    if (this.worker) {
+      this.worker.start()
+    } else {
+      this.queue = new Queue
+      this.worker = new Worker(this.queue, { max, sleep })
+      this.default = new Orderly()
+    }
+
+    return this.default
+  }
+
+  static pause = function() {
+    if (this.worker) this.worker.stop()
+  }
+
+  static stop = function() {
+    this.pause()
+    this.queue = this.worker = this.default = undefined
+  }
 
   // ============================================
   // PUBLIC INTERFACE
   // ============================================
 
-  function ajax(url, options = {}) {
-    let req = new Ajax(url, options)
+  constructor(options = {}) {
+    this.options = options
+  }
+
+  withOptions({ as, ...options } = {}) {
+    return new Orderly(Object.assign({}, this.options, options))
+  }
+
+  ajax(url, options = {}) {
+    let req = new Ajax(url, Object.assign({}, this.options, options))
     let job = new Job({ action: req.execute, priority: options.priority })
 
     queue.add(job)
@@ -31,23 +71,21 @@ function Orderly({ debug, max, sleep } = {}) {
     return req
   }
 
-  function get(url, options = {}) {
+  get(url, options = {}) {
     return ajax(url, Object.assign(options, { method: 'GET' }))
   }
 
-  function post(url, options = {}) {
+  post(url, options = {}) {
     return ajax(url, Object.assign(options, { method: 'POST' }))
   }
 
-  function put(url, options = {}) {
+  put(url, options = {}) {
     return ajax(url, Object.assign(options, { method: 'PUT' }))
   }
 
-  function del(url, options = {}) {
+  del(url, options = {}) {
     return ajax(url, Object.assign(options, { method: 'DELETE' }))
   }
-
-  return { ajax, get, post, put, del, queue, worker }
 }
 
 export default Orderly

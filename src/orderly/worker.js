@@ -12,23 +12,26 @@ function dispatch(func, ...args) {
 
 class Worker {
   constructor(queue, { sleep = 50, max = 8 } = {}) {
+    this.queue = queue
+    this.sleep = sleep
+    this.max = max
+
     this.pending = 0
     this.continue = true
-
-    this.start(queue, sleep, max)
   }
 
-  start = (queue, sleep, max) => {
-    while (this.continue && isFree(this.pending, max) && hasJob(queue)) {
+  start = () => {
+    while (isFree(this.pending, this.max) && hasJob(this.queue)) {
       this.pending += 1
-      let job = queue.get()
+      let job = this.queue.get()
+
       dispatch(job.execute, this.complete)
     }
 
-    if (this.continue) {
-      queue.cleanup()
-      this.setTimeout = setTimeout(this.start, sleep, queue, sleep, max)
-    }
+    this.queue.cleanup()
+
+    if (this.continue)
+      this.setTimeout = setTimeout(this.start, this.sleep)
   }
 
   stop() {

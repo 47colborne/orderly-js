@@ -20,10 +20,7 @@ global.window = document.defaultView
 global.navigator = { userAgent: 'node.js' }
 
 // require fetch
-let { fetch, Headers, Request, Response } = require('whatwg-fetch')
+let fetch = require('node-fetch')
 global.fetch = fetch
-global.Headers = Headers
-global.Request = Request
-global.Response = Response
 
 export { assert, expect, lib, sinon }
