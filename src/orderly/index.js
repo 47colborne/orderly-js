@@ -30,13 +30,13 @@ class Orderly {
   // ============================================
 
   static start = function({ max, sleep } = {}) {
-    if (this.worker) {
-      this.worker.start()
-    } else {
+    if (!this.worker) {
       this.queue = new Queue
       this.worker = new Worker(this.queue, { max, sleep })
       this.default = new Orderly()
     }
+
+    this.worker.start()
 
     return this.default
   }
