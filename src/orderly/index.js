@@ -72,19 +72,19 @@ class Orderly {
   }
 
   get(url, options = {}) {
-    return ajax(url, Object.assign(options, { method: 'GET' }))
+    return this.ajax(url, Object.assign(options, { method: 'GET' }))
   }
 
   post(url, options = {}) {
-    return ajax(url, Object.assign(options, { method: 'POST' }))
+    return this.ajax(url, Object.assign(options, { method: 'POST' }))
   }
 
   put(url, options = {}) {
-    return ajax(url, Object.assign(options, { method: 'PUT' }))
+    return this.ajax(url, Object.assign(options, { method: 'PUT' }))
   }
 
   del(url, options = {}) {
-    return ajax(url, Object.assign(options, { method: 'DELETE' }))
+    return this.ajax(url, Object.assign(options, { method: 'DELETE' }))
   }
 }
 
