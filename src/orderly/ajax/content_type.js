@@ -12,10 +12,10 @@ function parseResponse(type, resolve, reject) {
     if (!type && bodyContainsJson(resp))
       type = 'json'
 
-    resp[type]().then(function(data) {
-        resp.data = data
-        resolve(resp)
-      }).catch(reject)
+    return resp[type]().then((data) => {
+      resp['data'] = data
+      return resp
+    })
   }
 }
 

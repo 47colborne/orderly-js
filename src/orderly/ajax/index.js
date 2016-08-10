@@ -5,9 +5,12 @@ import { log } from '../debug'
 
 import Version from './version'
 
-const SKIP_STATUS = 'skipped'
-const CANCEL_STATUS = 'cancelled'
-const STAMP_KEY = '_v'
+const VERSION_KEY = 'orderly_version'
+const STATUS_KEY = 'orderly_status'
+const STATUS_SKIP = 'ORDERLY_SKIPPED'
+const STATUS_CANCEL = 'ORDERLY_CANCELLED'
+
+
 
 function logAction(action, version, priority) {
   log('Ajax', action, { url: version.key, id: version.id, priority })
@@ -21,18 +24,17 @@ function shouldSkip(skip, conditions, version) {
   return skip !== false && (anyConditionMet(conditions) || version.sentIsOutdated())
 }
 
-function shouldCancel(resp, conditions, version, priority, reject) {
+function shouldCancel(resp, conditions, version, priority) {
   if (anyConditionMet(conditions, resp) || version.receivedIsOutdated()) {
     logAction('CANCELLED', version, priority)
-    resp = { ...resp, status: CANCEL_STATUS }
-    return reject(resp)
+    throw({ [STATUS_KEY]: STATUS_CANCEL })
   } else {
     logAction('RECEIVED', version, priority)
   }
 }
 
-function insertVersion(resp, key, value) {
-  resp[key] = value
+function insertVersion(resp, value) {
+  resp[VERSION_KEY] = value
 }
 
 function initHeader(headers, body, type) {
@@ -49,29 +51,22 @@ function initRequest(url, { headers, body, type, ...options }) {
   return { ...options, headers, body }
 }
 
-function initAction(url, request, { type, priority, skip }, version) {
-  return function actionWithoutPromise(resolve, reject) {
-    return function action(conditions) {
-      if (shouldSkip(skip, conditions, version)) {
-        logAction('SKIPPED', version, priority)
-        return reject({ status: SKIP_STATUS })
-      }
-
-      version.sent()
-      logAction('SENT', version, priority)
-
-      return fetch(url, request)
-        .then(proxy(shouldCancel, conditions, version, priority, reject))
-        .then(proxy(version.received))
-        .then(proxy(insertVersion, STAMP_KEY, version))
-        .then(parseResponse(type, resolve, reject))
-        .catch(reject)
+function initAction(url, request, version, { type, priority, skip }) {
+  return function(conditions) {
+    if (shouldSkip(skip, conditions, version)) {
+      logAction('SKIPPED', version, priority)
+      return Promise.reject({ [STATUS_KEY]: STATUS_SKIP })
     }
-  }
-}
 
-function initExecute(func, conditions) {
-  return function execute() { return func(conditions) }
+    version.sent()
+    logAction('SENT', version, priority)
+
+    return fetch(url, request)
+      .then(proxy(shouldCancel, conditions, version, priority))
+      .then(proxy(version.received))
+      .then(proxy(insertVersion, version))
+      .then(parseResponse(type))
+  }
 }
 
 class Ajax {
@@ -79,15 +74,30 @@ class Ajax {
     version = new Version(filterParams(url), version)
 
     let request = initRequest(url, options)
-    let action = initAction(url, request, options, version)
+    let action = initAction(url, request, version, options)
 
     this.conditions = []
+
     this.q = new Promise((resolve, reject) => {
-      action = action(resolve, reject)
-      this.execute = initExecute(action, this.conditions)
+      this.execute = () => {
+        return action(this.conditions)
+          .then(this.done)
+          .then(resolve)
+          .catch(reject)
+          .then(this.cleanup)
+
+      }
     })
 
     logAction('CREATED', version, options.priority)
+  }
+
+  done = (resp) => {
+    return this.resp = resp
+  }
+
+  cleanup = () => {
+    this.q = this.execute = this.conditions = undefined
   }
 
   cancel(callback) {

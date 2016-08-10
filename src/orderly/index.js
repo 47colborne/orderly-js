@@ -5,15 +5,16 @@ import Job from './job'
 import Queue from './queue'
 import Worker from './worker'
 
-
-
 class Orderly {
 
   // ============================================
   // SET DEBUG MODE
   // ============================================
 
-  static setMode = setMode
+  static debugMode = function(bool) {
+    setMode(bool)
+    return this
+  }
 
   // ============================================
   // CLASS SHARED VERIABLES

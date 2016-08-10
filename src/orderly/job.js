@@ -9,7 +9,11 @@ class Job {
     let r = this.action()
 
     if (callback && typeof callback === 'function') {
-      r = (r && r instanceof Promise) ? r.then(callback) : callback(r)
+      if ((r && r instanceof Promise)) {
+        r.then(callback)
+      } else {
+        callback(r)
+      }
     }
 
     return r
