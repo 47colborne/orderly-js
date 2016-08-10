@@ -81,22 +81,21 @@ class Ajax {
     this.q = new Promise((resolve, reject) => {
       this.execute = () => {
         return action(this.conditions)
-          .then(this.done)
+          .then(this.__done__)
           .then(resolve)
           .catch(reject)
-          .then(this.cleanup)
-
+          .then(this.__cleanup__)
       }
     })
 
     logAction('CREATED', version, options.priority)
   }
 
-  done = (resp) => {
+  __done__ = (resp) => {
     return this.resp = resp
   }
 
-  cleanup = () => {
+  __cleanup__ = () => {
     this.q = this.execute = this.conditions = undefined
   }
 

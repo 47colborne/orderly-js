@@ -7,8 +7,7 @@ function proxy(callback, ...args) {
 
 function proxyWithCondition(callback, condition) {
   return function(resp) {
-    if (condition(resp))
-      resp = callback(resp)
+    if (condition(resp)) callback(resp)
     return resp
   }
 }
