@@ -1,32 +1,50 @@
-const MIME_TYPE = {
+
+const MIME_TYPES = {
   json: 'application/json'
 }
 
 function bodyContainsJson(resp) {
   let ct = resp.headers.get('Content-Type')
-  return ct && ct.includes(MIME_TYPE.json)
+  return ct && ct.includes(MIME_TYPES.json)
 }
 
-function parseResponse(type, resolve, reject) {
-  return function(resp) {
-    if (!type && bodyContainsJson(resp))
-      type = 'json'
+function includeData(resp) {
+  return function(data) {
+    resp['data'] = data
+    return resp
+  }
+}
 
-    return resp[type]().then((data) => {
-      resp['data'] = data
-      return resp
-    })
+function includeType(type) {
+  return function(resp) {
+    if (!type)
+      type = bodyContainsJson(resp) ? 'json' : 'text'
+
+    resp['orderly_type'] = type
+    return resp
+  }
+}
+
+function convertType(resp) {
+  return resp[resp.orderly_type]()
+}
+
+function parseResponse(type) {
+  return function(resp) {
+    return Promise.resolve(resp)
+      .then(includeType(type))
+      .then(convertType)
+      .then(includeData(resp))
   }
 }
 
 function accepts(type) {
-  if (type === 'json') return { 'Accept': MIME_TYPE.json }
+  if (type === 'json') return { 'Accept': MIME_TYPES.json }
 }
 
 function contentType(body, type) {
-  if ((body && typeof body === 'object') || type === 'json' ) {
-    return { 'Content-Type': MIME_TYPE.json }
-  }
+  if (type === 'json' || (typeof body === 'object'))
+    return { 'Content-Type': MIME_TYPES.json }
 }
 
 function requestContentType(body, type) {

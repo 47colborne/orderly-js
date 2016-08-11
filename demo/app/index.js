@@ -1,6 +1,9 @@
 import Orderly from '../../dist'
 import 'whatwg-fetch'
 
+import React, { Component } from 'react'
+import ReactDOM from 'react-dom'
+
 Orderly.debugMode(false)
 
 let o = Orderly.start()
@@ -9,33 +12,94 @@ function randomInt(min, max) {
   return parseInt(Math.random() * (max - min)) + min
 }
 
-let randomPriorities = new Array(1000)
-  .fill(undefined)
-
 let url = 'http://jsonplaceholder.typicode.com/posts'
+
+function getPosts(size, times, callback) {
+  let n = 0
+  while (n < times) {
+    setTimeout(() => {
+      new Array(size)
+        .fill(undefined)
+        .forEach((_, index) => {
+          setTimeout(() => {
+            o.get(url, {
+              type: 'json',
+              priority: randomInt(1, 10)
+            })
+            .success(resp => {
+              callback(resp.data)
+            })
+
+          }, randomInt(0, 5000))
+        })
+
+    }, randomInt(0, 5000))
+    n++
+  }
+}
+
+class Post extends Component {
+  render() {
+    let { id, userId, title, body } = this.props.post
+    return (
+      <div className="post" id={ id }>
+        <h3 className="title">{ title }</h3>
+        <p className="body">{ body }</p>
+      </div>
+    )
+  }
+}
+
+class Posts extends Component {
+
+  constructor(props) {
+    super(props)
+    this.state = { posts: [] }
+  }
+
+  renderPosts() {
+    return this.state.posts.map((post, index) => {
+      return <Post key={ index } post={ post } />
+    })
+  }
+
+  componentDidMount() {
+    getPosts(10, 100, (posts) => {
+      console.log(posts);
+      this.setState({
+        posts: [...this.state.posts, ...posts]
+      })
+    })
+  }
+
+  render() {
+    return (
+      <div id="posts">
+        { this.renderPosts() }
+      </div>
+    )
+  }
+}
+
+class App extends Component {
+  render() {
+    return (
+      <div id="app">
+        <Posts />
+      </div>
+    )
+  }
+}
+
+ReactDOM.render(
+  <App />,
+  document.getElementById('root')
+)
+
+
 
 // BASIC CASE
 // ==============================================
-
-setTimeout(() => {
-  randomPriorities.forEach((_, index) => {
-    setTimeout(() => {
-      o.get(url, {
-        type: 'json',
-        priority: randomInt(1, 10)
-      })
-       .success(resp => {
-        // console.log('SUCCESS', resp.orderly_version.id)
-      })
-       .catch(err => {
-        // console.log('ERROR!!!', err)
-      })
-
-    }, randomInt(0, 1000))
-
-  })
-
-}, randomInt(0, 1))
 
 // setTimeout(() => {
 //   randomPriorities.forEach((priority, index) => {

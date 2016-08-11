@@ -10,8 +10,6 @@ const STATUS_KEY = 'orderly_status'
 const STATUS_SKIP = 'ORDERLY_SKIPPED'
 const STATUS_CANCEL = 'ORDERLY_CANCELLED'
 
-
-
 function logAction(action, version, priority) {
   log('Ajax', action, { url: version.key, id: version.id, priority })
 }
@@ -37,8 +35,8 @@ function insertVersion(resp, value) {
   resp[VERSION_KEY] = value
 }
 
-function initHeader(headers, body, type) {
-  return { ...headers, ...requestContentType(body, type) }
+function initHeader(headers = {}, body, type) {
+  return Object.assign(headers, requestContentType(body, type))
 }
 
 function initBody(body, type) {
@@ -46,9 +44,9 @@ function initBody(body, type) {
 }
 
 function initRequest(url, { headers, body, type, ...options }) {
-  headers = initHeader(headers, body, type)
-  body = initBody(body, type)
-  return { ...options, headers, body }
+  options.headers = initHeader(headers, body, type)
+  options.body = initBody(body, type)
+  return options
 }
 
 function initAction(url, request, version, { type, priority, skip }) {
