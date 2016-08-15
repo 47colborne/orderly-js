@@ -1,22 +1,23 @@
-class Job {
-  constructor({ action, priority = 0, ...options } = {}) {
-    this.action = action
-    this.priority = priority
-    this.options = options
-  }
+function initExecute(execute) {
+  return function(callback) {
+    let r = execute()
 
-  execute = (callback) => {
-    let r = this.action()
-
-    if (callback && typeof callback === 'function') {
-      if ((r && r instanceof Promise)) {
-        r.then(callback)
+    if (typeof callback === 'function') {
+      if (r instanceof Promise) {
+        return r.then(callback)
       } else {
-        callback(r)
+        return callback(r)
       }
     }
 
     return r
+  }
+}
+
+class Job {
+  constructor(execute , priority = 0) {
+    this.execute = initExecute(execute)
+    this.priority = priority
   }
 }
 

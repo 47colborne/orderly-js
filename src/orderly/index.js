@@ -65,7 +65,7 @@ class Orderly {
 
   ajax(url, options = {}) {
     let req = new Ajax(url, Object.assign({}, this.options, options))
-    let job = new Job({ action: req.execute, priority: options.priority })
+    let job = new Job(req.execute, options.priority)
 
     Orderly.queue.add(job)
 

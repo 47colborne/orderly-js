@@ -1,7 +1,3 @@
-function hasJob(queue) {
-  return !queue.isEmpty()
-}
-
 class Worker {
   constructor(queue, { sleep = 50, max = 8 } = {}) {
     this.queue = queue
@@ -13,7 +9,7 @@ class Worker {
   }
 
   start = () => {
-    while (this.pending <= this.max && hasJob(this.queue)) {
+    while (this.pending <= this.max && !this.queue.isEmpty()) {
       this.pending += 1
       let job = this.queue.get()
 
