@@ -13,11 +13,11 @@ function conditionalProxy(callback, condition) {
 }
 
 function onFail(callback) {
-  return conditionalProxy(callback, resp => resp.status >= 400)
+  return conditionalProxy(callback, resp => resp && resp.status >= 400)
 }
 
 function onSuccess(callback) {
-  return conditionalProxy(callback, resp => resp.status < 400)
+  return conditionalProxy(callback, resp => resp && resp.status < 400)
 }
 
 export { proxy, conditionalProxy, onFail, onSuccess }

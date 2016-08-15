@@ -512,13 +512,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function onFail(callback) {
 	  return conditionalProxy(callback, function (resp) {
-	    return resp.status >= 400;
+	    return resp && resp.status >= 400;
 	  });
 	}
 
 	function onSuccess(callback) {
 	  return conditionalProxy(callback, function (resp) {
-	    return resp.status < 400;
+	    return resp && resp.status < 400;
 	  });
 	}
 

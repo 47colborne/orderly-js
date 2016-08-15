@@ -4,7 +4,7 @@ import 'whatwg-fetch'
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 
-Orderly.debugMode(true)
+Orderly.debugMode(false)
 
 let o = Orderly.start()
 
@@ -86,10 +86,12 @@ class Posts extends Component {
           priority: randomInt(1, 10)
         })
         .success(resp => {
-          console.log(resp)
           this.setState({
             posts: [...this.state.posts, ...resp.data]
           })
+        })
+        .then((resp) => {
+          console.log('THEN', resp)
         })
         .fail(resp => {
           console.log('Request Failed')
