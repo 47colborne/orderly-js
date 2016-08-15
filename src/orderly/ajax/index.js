@@ -1,18 +1,11 @@
 import { onSuccess, onFail, proxy } from './callbacks'
 import { parseResponse, requestContentType } from './content_type'
 import { filterParams } from './url'
-import { log } from '../debug'
+
+import { STATUS_KEY, STATUS_SKIP, STATUS_CANCEL, VERSION_KEY } from './constants'
+import { debugLogger } from './misc'
 
 import Version from './version'
-
-const STATUS_KEY = 'statusText'
-const STATUS_SKIP = 'skipped'
-const STATUS_CANCEL = 'cancelled'
-const VERSION_KEY = 'version'
-
-function debugLogger(action, version, priority) {
-  log('Ajax', action, { url: version.key, id: version.id, priority })
-}
 
 function buildResponse(status, version) {
   return {

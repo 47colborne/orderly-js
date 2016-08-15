@@ -1,4 +1,3 @@
-
 const MIME_TYPES = {
   json: 'application/json'
 }

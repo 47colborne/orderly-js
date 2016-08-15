@@ -4,7 +4,7 @@ import 'whatwg-fetch'
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 
-Orderly.debugMode(false)
+Orderly.debugMode(true)
 
 let o = Orderly.start()
 
