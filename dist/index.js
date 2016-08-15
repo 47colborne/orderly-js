@@ -301,7 +301,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var STATUS_CANCEL = 'cancelled';
 	var VERSION_KEY = 'version';
 
-	function logAction(action, version, priority) {
+	function debugLogger(action, version, priority) {
 	  (0, _debug.log)('Ajax', action, { url: version.key, id: version.id, priority: priority });
 	}
 
@@ -327,10 +327,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function shouldCancel(resp, conditions, version, priority) {
 	  if (anyConditionMet(conditions, resp) || version.receivedIsOutdated()) {
-	    logAction('CANCELLED', version, priority);
+	    debugLogger('CANCELLED', version, priority);
 	    throw buildResponse(STATUS_CANCEL, version);
 	  } else {
-	    logAction('RECEIVED', version, priority);
+	    debugLogger('RECEIVED', version, priority);
 	  }
 	}
 
@@ -369,12 +369,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return function (conditions) {
 	    if (shouldSkip(skip, conditions, version)) {
-	      logAction('SKIPPED', version, priority);
+	      debugLogger('SKIPPED', version, priority);
 	      return Promise.reject(buildResponse(STATUS_SKIP, version));
 	    }
 
 	    version.sent();
-	    logAction('SENT', version, priority);
+	    debugLogger('SENT', version, priority);
 
 	    return fetch(url, request).then((0, _callbacks.proxy)(shouldCancel, conditions, version, priority)).then((0, _callbacks.proxy)(version.received)).then((0, _callbacks.proxy)(appendVersion, version)).then((0, _content_type.parseResponse)(type));
 	  };
@@ -424,7 +424,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 	    });
 
-	    logAction('CREATED', version, options.priority);
+	    debugLogger('CREATED', version, options.priority);
 	  }
 
 	  // Resolve with a new promise to dispose the previouse promise
