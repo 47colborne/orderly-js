@@ -4,7 +4,7 @@ import 'whatwg-fetch'
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 
-Orderly.debugMode(false)
+Orderly.debugMode(true)
 
 let o = Orderly.start()
 
@@ -28,6 +28,12 @@ function getPosts(size, times, callback) {
             })
             .success(resp => {
               callback(resp.data)
+            })
+            .fail(resp => {
+              console.log('Request Failed')
+            })
+            .catch(err => {
+              console.log('ERROR', err)
             })
 
           }, randomInt(0, 5000))
@@ -64,12 +70,40 @@ class Posts extends Component {
   }
 
   componentDidMount() {
-    getPosts(10, 100, (posts) => {
-      console.log(posts);
-      this.setState({
-        posts: [...this.state.posts, ...posts]
-      })
-    })
+    // getPosts(10, 10, (posts) => {
+    //   console.log(posts);
+    //   this.setState({
+    //     posts: [...this.state.posts, ...posts]
+    //   })
+    // })
+    let n = 0
+    this.requests = []
+    while (n < 100) {
+
+      setTimeout(() => {
+        let ajax = o.get(url, {
+          type: 'json',
+          priority: randomInt(1, 10)
+        })
+        .success(resp => {
+          console.log(resp)
+          this.setState({
+            posts: [...this.state.posts, ...resp.data]
+          })
+        })
+        .fail(resp => {
+          console.log('Request Failed')
+        })
+        .catch(err => {
+          console.log('ERROR', err)
+        })
+        this.requests.push(ajax)
+
+      }, randomInt(0, 2000))
+
+
+      n++
+    }
   }
 
   render() {
