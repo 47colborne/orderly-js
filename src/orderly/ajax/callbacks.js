@@ -1,4 +1,5 @@
 function proxy(callback, ...args) {
+  if (!callback) callback = () => {}
   return function(resp) {
     callback(resp, ...args)
     return resp

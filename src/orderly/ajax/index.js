@@ -1,5 +1,8 @@
 import { onSuccess, onFail, proxy } from './callbacks'
-import { parseResponse, requestContentType } from './content_type'
+
+import request from './request'
+import response from './response'
+
 import { filterParams } from './url'
 
 import { STATUS_KEY, STATUS_SKIP, STATUS_CANCEL, VERSION_KEY } from './constants'
@@ -38,16 +41,23 @@ function appendVersion(resp, value) {
 }
 
 function initHeader(headers = {}, body, type) {
-  return Object.assign(headers, requestContentType(body, type))
+  return Object.assign(
+    headers,
+    request.accepts(type),
+    request.contentType(body, type)
+  )
 }
 
 function initBody(body, type) {
   return body && (typeof body === 'object' || type === 'json') ? JSON.stringify(body) : body
 }
 
-function initRequest(url, { headers, body, type, ...options }) {
+function initRequest(url, { before, headers, body, type, ...options }) {
   options.headers = initHeader(headers, body, type)
   options.body = initBody(body, type)
+
+  if (before) before(options)
+
   return options
 }
 
@@ -65,12 +75,12 @@ function initAction(url, request, version, { type, priority, skip }) {
       .then(proxy(shouldCancel, conditions, version, priority))
       .then(proxy(version.received))
       .then(proxy(appendVersion, version))
-      .then(parseResponse(type))
+      .then(response.contentType)
   }
 }
 
 class Ajax {
-  constructor(url, { version, ...options } = {}) {
+  constructor(url, { after, version, ...options } = {}) {
     // create new version for this request
     version = new Version(filterParams(url), version)
 
@@ -91,13 +101,15 @@ class Ajax {
 
         // trigger the action with the conditions passed in
         // action must returns an promise
-        return action(this.conditions)
+        action(this.conditions)
           .then(this.__done__)
+          .then(proxy(after))
           .then(resolve)
           .catch(reject)
           .then(this.__cleanup__)
       }
     })
+
 
     debugLogger('CREATED', version, options.priority)
   }

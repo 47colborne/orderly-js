@@ -5,6 +5,18 @@ import Job from './job'
 import Queue from './queue'
 import Worker from './worker'
 
+function appendCallback(options, key, callback) {
+  let previous = options[key]
+
+  if (typeof callback === 'function') {
+    if (typeof previous === 'function')  {
+      callback = function(resp) { return callback(previous(resp)) }
+    }
+
+    return callback
+  }
+}
+
 class Orderly {
 
   // ============================================
@@ -59,11 +71,26 @@ class Orderly {
     this.options = options
   }
 
-  withOptions({ as, ...options } = {}) {
-    return new Orderly(Object.assign({}, this.options, options))
+  withOptions({ before, after, ...options } = {}) {
+    options.after = appendCallback(this.options, 'after', after)
+    options.before = appendCallback(this.options, 'before', before)
+
+    return new Orderly({ ...this.options, ...options })
+  }
+
+  after(callback) {
+    this.options.after = appendCallback(this.options, 'after', callback)
+    return this
+  }
+
+  before(callback) {
+    this.options.before = appendCallback(this.options, 'before', callback)
+    return this
   }
 
   ajax(url, options = {}) {
+    if (!url) throw "Invalid URL: url is undefined"
+
     let req = new Ajax(url, Object.assign({}, this.options, options))
     let job = new Job(req.execute, options.priority)
 
