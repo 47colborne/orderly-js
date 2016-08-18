@@ -19,16 +19,19 @@ function buildResponse(status, version) {
   }
 }
 
-function anyConditionMet(conditions, ...args) {
-  return conditions.some(condition => condition(...args))
+function conditionMet(condition, arg) {
+  return (typeof condition === 'function') && condition(arg)
 }
 
-function shouldSkip(skip, conditions, version) {
-  return skip !== false && (anyConditionMet(conditions) || version.sentIsOutdated())
+function shouldSkip(skip, condition, version) {
+  return skip !== false && (
+    conditionMet(condition) ||
+    Version.isOutdated(version, 'sent'
+  ))
 }
 
-function shouldCancel(resp, conditions, version, priority) {
-  if (anyConditionMet(conditions, resp) || version.receivedIsOutdated()) {
+function shouldCancel(resp, condition, version, priority) {
+  if (conditionMet(condition, resp) || Version.isOutdated(version, 'received')) {
     debugLogger('CANCELLED', version, priority)
     throw(buildResponse(STATUS_CANCEL, version))
   } else {
@@ -62,8 +65,8 @@ function initRequest(url, { before, headers, body, type, ...options }) {
 }
 
 function initAction(url, request, version, { type, priority, skip }) {
-  return function(conditions) {
-    if (shouldSkip(skip, conditions, version)) {
+  return function(condition) {
+    if (shouldSkip(skip, condition, version)) {
       debugLogger('SKIPPED', version, priority)
       return Promise.reject(buildResponse(STATUS_SKIP, version))
     }
@@ -72,7 +75,7 @@ function initAction(url, request, version, { type, priority, skip }) {
     debugLogger('SENT', version, priority)
 
     return fetch(url, request)
-      .then(proxy(shouldCancel, conditions, version, priority))
+      .then(proxy(shouldCancel, condition, version, priority))
       .then(proxy(version.received))
       .then(proxy(appendVersion, version))
       .then(response.contentType)
@@ -80,28 +83,14 @@ function initAction(url, request, version, { type, priority, skip }) {
 }
 
 class Ajax {
-  constructor(url, { after, version, ...options } = {}) {
-    // create new version for this request
-    version = new Version(filterParams(url), version)
-
-    // build request object
+  constructor(url, { after, group, versioned, ...options } = {}) {
+    let version = new Version(group || filterParams(url), versioned)
     let request = initRequest(url, options)
-
-    // build action function
     let action = initAction(url, request, version, options)
 
-    // initialize conditions used by skipping or cancelling request
-    this.conditions = []
-
-    // initialize the request promise
     this.q = new Promise((resolve, reject) => {
-
-      // build execute function, invoke sometimes later by Worker
       this.execute = () => {
-
-        // trigger the action with the conditions passed in
-        // action must returns an promise
-        action(this.conditions)
+        action(this.condition)
           .then(this.__done__)
           .then(proxy(after))
           .then(resolve)
@@ -110,43 +99,35 @@ class Ajax {
       }
     })
 
-
     debugLogger('CREATED', version, options.priority)
   }
 
-  // Resolve with a new promise to dispose the previouse promise
   __done__ = (resp) => {
     return this.q = Promise.resolve(resp)
   }
 
-  // clean up after the request
   __cleanup__ = () => {
-    this.execute = this.conditions = undefined
+    this.execute = this.condition = undefined
   }
 
-  // add cancel conditions
   cancel(callback) {
-    this.conditions.push(callback)
+    this.condition = callback
     return this
   }
 
-  // proxy through the promise catch clause
   catch(callback) {
     this.q = this.q.catch(callback)
     return this
   }
 
-  // invoking callback only when response status is 400 and above
   fail(callback) {
     return this.then(onFail(callback))
   }
 
-  // invoking callback only when response status is less than 400
   success(callback) {
     return this.then(onSuccess(callback))
   }
 
-  // reuglar then chaining clause
   then(callback) {
     this.q = this.q.then(callback)
     return this

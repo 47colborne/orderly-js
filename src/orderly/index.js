@@ -5,18 +5,6 @@ import Job from './job'
 import Queue from './queue'
 import Worker from './worker'
 
-function appendCallback(options, key, callback) {
-  let previous = options[key]
-
-  if (typeof callback === 'function') {
-    if (typeof previous === 'function')  {
-      callback = function(resp) { return callback(previous(resp)) }
-    }
-
-    return callback
-  }
-}
-
 class Orderly {
 
   // ============================================
@@ -71,20 +59,19 @@ class Orderly {
     this.options = options
   }
 
-  withOptions({ before, after, ...options } = {}) {
-    options.after = appendCallback(this.options, 'after', after)
-    options.before = appendCallback(this.options, 'before', before)
-
+  withOptions(options = {}) {
     return new Orderly({ ...this.options, ...options })
   }
 
   after(callback) {
-    this.options.after = appendCallback(this.options, 'after', callback)
+    if (typeof callback !== 'function') throw ("Invalid Function Call #after")
+    this.options.after = callback
     return this
   }
 
   before(callback) {
-    this.options.before = appendCallback(this.options, 'before', callback)
+    if (typeof callback !== 'function') throw ("Invalid Function Call #before")
+    this.options.before = callback
     return this
   }
 

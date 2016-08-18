@@ -1,17 +1,31 @@
-function initValue() {
-  return { counter: 0, sent: 0, received: 0 }
-}
-
 class Version {
 
   static map = {}
 
   static get = function(key) {
-    return this.map[key] || (this.map[key] = initValue())
+    return this.map[key] || (this.map[key] = { counter: 0, sent: 0, received: 0 })
   }
 
   static inc = function(key) {
     return this.get(key).counter += 1
+  }
+
+  static isOutdated(version, action) {
+    return version.check && this.get(version.key)[action] > version.id
+  }
+
+  static sent(version) {
+    let record = this.get(version.key)
+    if (version.id > record.sent) {
+      return record.sent = version.id
+    }
+  }
+
+  static received(version) {
+    let record = this.get(version.key)
+    if (version.id > record.received) {
+      return record.received = version.id
+    }
   }
 
   constructor(key, check = true) {
@@ -20,26 +34,12 @@ class Version {
     this.id = Version.inc(key)
   }
 
-  sentIsOutdated = () => {
-    return this.check && Version.get(this.key)['sent'] > this.id
-  }
-
-  receivedIsOutdated = () => {
-    return this.check && Version.get(this.key)['received'] > this.id
-  }
-
   sent = () => {
-    let versionForKey = Version.get(this.key)
-    if (this.id > versionForKey.sent) {
-      return versionForKey.sent = this.id
-    }
+    return Version.sent(this)
   }
 
   received = () => {
-    let versionForKey = Version.get(this.key)
-    if (this.id > versionForKey.received) {
-      return versionForKey.received = this.id
-    }
+    return Version.received(this)
   }
 }
 
