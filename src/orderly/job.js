@@ -1,6 +1,6 @@
 function initExecute(execute) {
   return function(callback) {
-    return execute().then(callback)
+    return execute(callback)
   }
 }
 

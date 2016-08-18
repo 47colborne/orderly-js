@@ -1,8 +1,26 @@
 function proxy(callback, ...args) {
-  if (!callback) callback = () => {}
-  return function(resp) {
-    callback(resp, ...args)
-    return resp
+  if (!callback) {
+    return function(resp) {
+      return resp
+    }
+  } else {
+    return function(resp) {
+      callback(...args)
+      return resp
+    }
+  }
+}
+
+function catchProxy(callback, ...args) {
+  if (!callback) {
+    return function(err) {
+      throw(err)
+    }
+  } else {
+    return function(err) {
+      callback(...args)
+      throw(err)
+    }
   }
 }
 
@@ -21,4 +39,4 @@ function onSuccess(callback) {
   return conditionalProxy(callback, resp => resp && resp.status < 400)
 }
 
-export { proxy, conditionalProxy, onFail, onSuccess }
+export { proxy, catchProxy, conditionalProxy, onFail, onSuccess }

@@ -1,5 +1,5 @@
 class Worker {
-  constructor(queue, { sleep = 50, max = 8 } = {}) {
+  constructor(queue, { sleep = 32, max = 8 } = {}) {
     this.queue = queue
     this.sleep = sleep
     this.max = max

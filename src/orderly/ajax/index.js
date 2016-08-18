@@ -1,4 +1,4 @@
-import { onSuccess, onFail, proxy } from './callbacks'
+import { onSuccess, onFail, proxy, catchProxy } from './callbacks'
 
 import request from './request'
 import response from './response'
@@ -89,10 +89,11 @@ class Ajax {
     let action = initAction(url, request, version, options)
 
     this.q = new Promise((resolve, reject) => {
-      this.execute = () => {
+      this.execute = (callback) => {
         return action(this.condition)
-          .then(this.__done__)
+          .then(proxy(callback), catchProxy(callback))
           .then(proxy(after))
+          .then(this.__done__)
           .then(resolve)
           .catch(reject)
           .then(this.__cleanup__)
