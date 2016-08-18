@@ -63,37 +63,37 @@ describe('Ajax Version', function() {
     })
   })
 
-  describe('sentIsOutdated', function() {
-    let key = 'key'
+  // describe('sentIsOutdated', function() {
+  //   let key = 'key'
 
-    it('returns false when last sent is not greater than own id', function() {
-      let version = new Version(key)
-      expect(version.sentIsOutdated()).to.eq(false)
-    })
+  //   it('returns false when last sent is not greater than own id', function() {
+  //     let version = new Version(key)
+  //     expect(version.sentIsOutdated()).to.eq(false)
+  //   })
 
-    it('returns true when last sent is greater than own id', function() {
-      let version1 = new Version(key)
-      let version2 = new Version(key)
-      version2.sent()
-      expect(version1.sentIsOutdated()).to.eq(true)
-    })
-  })
+  //   it('returns true when last sent is greater than own id', function() {
+  //     let version1 = new Version(key)
+  //     let version2 = new Version(key)
+  //     version2.sent()
+  //     expect(version1.sentIsOutdated()).to.eq(true)
+  //   })
+  // })
 
-  describe('receivedIsOutdated', function() {
-    let key = 'key'
+  // describe('receivedIsOutdated', function() {
+  //   let key = 'key'
 
-    it('returns false when last received is not greater than own id', function() {
-      let version = new Version(key)
-      expect(version.receivedIsOutdated()).to.eq(false)
-    })
+  //   it('returns false when last received is not greater than own id', function() {
+  //     let version = new Version(key)
+  //     expect(version.receivedIsOutdated()).to.eq(false)
+  //   })
 
-    it('returns true when last received is greater than own id', function() {
-      let version1 = new Version(key)
-      let version2 = new Version(key)
-      version2.received()
-      expect(version1.receivedIsOutdated()).to.eq(true)
-    })
-  })
+  //   it('returns true when last received is greater than own id', function() {
+  //     let version1 = new Version(key)
+  //     let version2 = new Version(key)
+  //     version2.received()
+  //     expect(version1.receivedIsOutdated()).to.eq(true)
+  //   })
+  // })
 
   describe('sent', function() {
     let key = 'key'

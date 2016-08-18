@@ -9,7 +9,7 @@ class Worker {
   }
 
   start = () => {
-    while (this.pending <= this.max && !this.queue.isEmpty()) {
+    while (this.pending < this.max && !this.queue.isEmpty()) {
       this.pending += 1
       let job = this.queue.get()
 

@@ -90,7 +90,7 @@ class Ajax {
 
     this.q = new Promise((resolve, reject) => {
       this.execute = () => {
-        action(this.condition)
+        return action(this.condition)
           .then(this.__done__)
           .then(proxy(after))
           .then(resolve)
