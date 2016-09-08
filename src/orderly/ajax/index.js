@@ -24,14 +24,11 @@ function conditionMet(condition, arg) {
 }
 
 function shouldSkip(skip, condition, version) {
-  return skip !== false && (
-    conditionMet(condition) ||
-    Version.isOutdated(version, 'sent'
-  ))
+  return skip !== false && (Version.isOutdated(version, 'sent') || conditionMet(condition))
 }
 
 function shouldCancel(resp, condition, version, priority) {
-  if (conditionMet(condition, resp) || Version.isOutdated(version, 'received')) {
+  if (Version.isOutdated(version, 'received') || conditionMet(condition, resp)) {
     debugLogger('CANCELLED', version, priority)
     throw(buildResponse(STATUS_CANCEL, version))
   } else {

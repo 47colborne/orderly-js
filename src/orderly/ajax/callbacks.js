@@ -5,7 +5,7 @@ function proxy(callback, ...args) {
     }
   } else {
     return function(resp) {
-      callback(...args)
+      callback(resp, ...args)
       return resp
     }
   }
@@ -18,7 +18,7 @@ function catchProxy(callback, ...args) {
     }
   } else {
     return function(err) {
-      callback(...args)
+      callback(err, ...args)
       throw(err)
     }
   }
