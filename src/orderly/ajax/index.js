@@ -3,8 +3,6 @@ import { onSuccess, onFail, proxy, catchProxy } from './callbacks'
 import request from './request'
 import response from './response'
 
-import { filterParams } from './url'
-
 import { STATUS_KEY, STATUS_SKIP, STATUS_CANCEL, VERSION_KEY } from './constants'
 import { debugLogger } from './misc'
 
@@ -80,8 +78,8 @@ function initAction(url, request, version, { type, priority, skip }) {
 }
 
 class Ajax {
-  constructor(url, { after, group, versioned, ...options } = {}) {
-    let version = new Version(group || filterParams(url), versioned)
+  constructor(url, { after, version, ...options } = {}) {
+    version = new Version(version)
     let request = initRequest(url, options)
     let action = initAction(url, request, version, options)
 

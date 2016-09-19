@@ -1,3 +1,5 @@
+import { filterParams } from './url'
+
 class Version {
 
   static map = {}
@@ -28,19 +30,15 @@ class Version {
     }
   }
 
-  constructor(key, check = true) {
-    this.check = check
-    this.key = key
-    this.id = Version.inc(key)
+  constructor(url, options = {}) {
+    this.check = options !== false
+    this.key = options.name || (options.filterParams ? filterParams(url) : url)
+    this.id = Version.inc(this.key)
   }
 
-  sent = () => {
-    return Version.sent(this)
-  }
+  sent = () => Version.sent(this)
 
-  received = () => {
-    return Version.received(this)
-  }
+  received = () => Version.received(this)
 }
 
 export default Version

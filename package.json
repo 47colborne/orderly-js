@@ -1,6 +1,6 @@
 {
   "name": "orderly-js",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "description": "Simple Ajax Priority Queue with the request versioning and aborting",
   "main": "./dist/index.js",
   "scripts": {
@@ -27,8 +27,5 @@
   },
   "dependencies": {
     "fastpriorityqueue": "^0.1.0"
-  },
-  "scripts": {
-    "test": "mocha \"test/orderly/**/*spec.js\" --compilers js:babel-core/register --require babel-polyfill -R progress"
   }
 }

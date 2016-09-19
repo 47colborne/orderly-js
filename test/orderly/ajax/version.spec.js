@@ -3,24 +3,25 @@ import { assert, expect, lib, sinon } from '../../test_helper'
 let Version = lib.src('orderly/ajax/version').default
 
 describe('Ajax Version', function() {
+  let key = 'key'
+
   afterEach(function() { Version.map = {} })
 
   describe('static get', function() {
     context('when the key exists', function() {
       it('returns the value', function() {
-        let key = 'key1'
         let value = 'value1'
         Version.map = { [key]: value }
         expect(Version.get(key)).to.eq(value)
       })
     })
-    context('when the key does not exist', function() {
-      let key = 'key'
 
+    context('when the key does not exist', function() {
       it('returns the default init value', function() {
         let defaultValue = { counter: 0, sent: 0, received: 0 }
         expect(Version.get(key)).to.deep.equal(defaultValue)
       })
+
       it('add the default init value to the key', function() {
         expect(Version.map[key]).to.not.exist
         Version.get(key)
@@ -30,8 +31,6 @@ describe('Ajax Version', function() {
   })
 
   describe('static inc', function() {
-    let key = 'key'
-
     it('increases the counter for specific key by 1', function() {
       let action = () => Version.inc(key)
       let version = Version.get(key)
@@ -50,92 +49,63 @@ describe('Ajax Version', function() {
     })
   })
 
-  describe('on initialize', function() {
-    let key = 'key'
-    let version = new Version(key)
+  describe('initialize', function() {
+    context('when options is set to false', function() {
+      let options = false
+      let version = new Version(key, options)
 
-    it('assigns an id to the version', function() {
-      expect(version.id).to.exist
+      it('toggles check to false', function() {
+        expect(version.check).to.eq(false)
+      })
     })
 
-    it('sets the version check to true by default', function() {
-      expect(version.check).to.eq(true)
+    context('when options name is set', function() {
+      let options = { name: 'version group' }
+      let version = new Version(key, options)
+
+      it('sets version key to the name', function() {
+        expect(version.key).to.eq(options.name)
+      })
+    })
+
+    context('when options filterParam is set to true', function() {
+      let key = 'http://www.example.com?name=test&desp=test'
+      let options = { filterParams: true }
+      let version = new Version(key, options)
+
+      it('filters url params and use it as the key', function() {
+        expect(version.key).to.eq('http://www.example.com')
+      })
+    })
+
+    context('by default', function() {
+      let key = 'http://www.example.com?name=test&desp=test'
+      let version = new Version(key, undefined)
+
+      it('checks and use the original key', function() {
+        expect(version.key).to.eq(key)
+        expect(version.check).to.eq(true)
+      })
     })
   })
 
-  // describe('sentIsOutdated', function() {
-  //   let key = 'key'
-
-  //   it('returns false when last sent is not greater than own id', function() {
-  //     let version = new Version(key)
-  //     expect(version.sentIsOutdated()).to.eq(false)
-  //   })
-
-  //   it('returns true when last sent is greater than own id', function() {
-  //     let version1 = new Version(key)
-  //     let version2 = new Version(key)
-  //     version2.sent()
-  //     expect(version1.sentIsOutdated()).to.eq(true)
-  //   })
-  // })
-
-  // describe('receivedIsOutdated', function() {
-  //   let key = 'key'
-
-  //   it('returns false when last received is not greater than own id', function() {
-  //     let version = new Version(key)
-  //     expect(version.receivedIsOutdated()).to.eq(false)
-  //   })
-
-  //   it('returns true when last received is greater than own id', function() {
-  //     let version1 = new Version(key)
-  //     let version2 = new Version(key)
-  //     version2.received()
-  //     expect(version1.receivedIsOutdated()).to.eq(true)
-  //   })
-  // })
-
   describe('sent', function() {
-    let key = 'key'
+    let version = new Version(key, undefined)
 
-    context('when the version sent is not outdated', function() {
-      it('sets own id to the map[key].sent', function() {
-        let version = new Version(key)
-        expect(version.sent).to.increase(Version.map[key], 'sent')
-        expect(Version.map[key].sent).to.eq(version.id)
-      })
-    })
-
-    context('when the version sent is outdated', function() {
-      it('does not set own id to the map[key].sent', function() {
-        let version1 = new Version(key)
-        let version2 = new Version(key)
-        version2.sent()
-        expect(version1.sent).to.not.change(Version.map[key], 'sent')
-      })
+    it('calls Version.sent and pass self', function() {
+      sinon.spy(Version, 'sent')
+      version.sent()
+      expect(Version.sent).has.been.calledWith(version)
     })
   })
 
   describe('received', function() {
-    let key = 'key'
+    let version = new Version(key, undefined)
 
-    context('when the version received is not outdated', function() {
-      it('sets own id to the map[key].received', function() {
-        let version = new Version(key)
-        expect(version.received).to.increase(Version.map[key], 'received')
-        expect(Version.map[key].received).to.eq(version.id)
-      })
-    })
-
-    context('when the version received is outdated', function() {
-      it('does not set own id to the map[key].received', function() {
-        let version1 = new Version(key)
-        let version2 = new Version(key)
-        version2.received()
-        expect(version1.received).to.not.change(Version.map[key], 'received')
-      })
+    it('calls Version.received and pass self', function() {
+      sinon.spy(Version, 'received')
+      version.received()
+      expect(Version.received).has.been.calledWith(version)
     })
   })
-
-
 })
