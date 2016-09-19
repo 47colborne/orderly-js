@@ -1,2 +1,1127 @@
-!function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define("Orderly",[],t):"object"==typeof exports?exports.Orderly=t():e.Orderly=t()}(this,function(){return function(e){function __webpack_require__(n){if(t[n])return t[n].exports;var r=t[n]={exports:{},id:n,loaded:!1};return e[n].call(r.exports,r,r.exports,__webpack_require__),r.loaded=!0,r.exports}var t={};return __webpack_require__.m=e,__webpack_require__.c=t,__webpack_require__.p="",__webpack_require__(0)}([function(e,t,n){e.exports=n(1)},function(e,t,n){"use strict";e.exports=n(2)},function(e,t,n){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{"default":e}}function _classCallCheck(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Object.defineProperty(t,"__esModule",{value:!0});var r=Object.assign||function(e){for(var t=1;t<arguments.length;t++){var n=arguments[t];for(var r in n)Object.prototype.hasOwnProperty.call(n,r)&&(e[r]=n[r])}return e},i=function(){function defineProperties(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}return function(e,t,n){return t&&defineProperties(e.prototype,t),n&&defineProperties(e,n),e}}(),o=n(3),u=n(4),a=_interopRequireDefault(u),c=n(12),s=_interopRequireDefault(c),f=n(13),l=_interopRequireDefault(f),d=n(16),p=_interopRequireDefault(d),y=function(){function Orderly(){var e=arguments.length<=0||void 0===arguments[0]?{}:arguments[0];_classCallCheck(this,Orderly),this.options=e}return i(Orderly,[{key:"withOptions",value:function(){var e=arguments.length<=0||void 0===arguments[0]?{}:arguments[0];return new Orderly(r({},this.options,e))}},{key:"after",value:function(e){if("function"!=typeof e)throw"Invalid Function Call #after";return this.options.after=e,this}},{key:"before",value:function(e){if("function"!=typeof e)throw"Invalid Function Call #before";return this.options.before=e,this}},{key:"ajax",value:function(e){var t=arguments.length<=1||void 0===arguments[1]?{}:arguments[1];if(!e)throw"Invalid URL: url is undefined";var n=new a["default"](e,Object.assign({},this.options,t)),r=new s["default"](n.execute,t.priority);return Orderly.queue.add(r),n}},{key:"get",value:function(e){var t=arguments.length<=1||void 0===arguments[1]?{}:arguments[1];return this.ajax(e,Object.assign(t,{method:"GET"}))}},{key:"post",value:function(e){var t=arguments.length<=1||void 0===arguments[1]?{}:arguments[1];return this.ajax(e,Object.assign(t,{method:"POST"}))}},{key:"put",value:function(e){var t=arguments.length<=1||void 0===arguments[1]?{}:arguments[1];return this.ajax(e,Object.assign(t,{method:"PUT"}))}},{key:"del",value:function(e){var t=arguments.length<=1||void 0===arguments[1]?{}:arguments[1];return this.ajax(e,Object.assign(t,{method:"DELETE"}))}}]),Orderly}();y.debugMode=function(e){return(0,o.setMode)(e),this},y.queue=void 0,y.worker=void 0,y.global=void 0,y.start=function(){var e=arguments.length<=0||void 0===arguments[0]?{}:arguments[0],t=e.max,n=e.sleep;return this.worker||(this.queue=new l["default"],this.worker=new p["default"](this.queue,{max:t,sleep:n}),this["default"]=new y),this.worker.start(),this["default"]},y.pause=function(){this.worker&&this.worker.stop()},y.stop=function(){this.pause(),this.queue=this.worker=this["default"]=void 0},t["default"]=y},function(e,t){"use strict";function setMode(e){return r=e}function getMode(){return r}function log(e,t){var i=arguments.length<=2||void 0===arguments[2]?{}:arguments[2];if(r){var o=Object.keys(i).reduce(function(e,t){var r=i[t];return"object"===("undefined"==typeof r?"undefined":n(r))&&(r=JSON.stringify(r)),e+" "+t+":"+r},e);o=o+" "+t,console.log(o)}}Object.defineProperty(t,"__esModule",{value:!0});var n="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol?"symbol":typeof e},r=!1;t.setMode=setMode,t.getMode=getMode,t.log=log},function(e,t,n){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{"default":e}}function _classCallCheck(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function _objectWithoutProperties(e,t){var n={};for(var r in e)t.indexOf(r)>=0||Object.prototype.hasOwnProperty.call(e,r)&&(n[r]=e[r]);return n}function _defineProperty(e,t,n){return t in e?Object.defineProperty(e,t,{value:n,enumerable:!0,configurable:!0,writable:!0}):e[t]=n,e}function buildResponse(e,t){var n;return n={},_defineProperty(n,f.STATUS_KEY,e),_defineProperty(n,f.VERSION_KEY,t),_defineProperty(n,"skipped",f.STATUS_SKIP===e),_defineProperty(n,"cancelled",f.STATUS_CANCEL===e),n}function conditionMet(e,t){return"function"==typeof e&&e(t)}function shouldSkip(e,t,n){return e!==!1&&(p["default"].isOutdated(n,"sent")||conditionMet(t))}function shouldCancel(e,t,n,r){if(p["default"].isOutdated(n,"received")||conditionMet(t,e))throw(0,l.debugLogger)("CANCELLED",n,r),buildResponse(f.STATUS_CANCEL,n);(0,l.debugLogger)("RECEIVED",n,r)}function appendVersion(e,t){e[f.VERSION_KEY]=t}function initHeader(){var e=arguments.length<=0||void 0===arguments[0]?{}:arguments[0],t=arguments[1],n=arguments[2];return Object.assign(e,a["default"].accepts(n),a["default"].contentType(t,n))}function initBody(e,t){return!e||"object"!==("undefined"==typeof e?"undefined":i(e))&&"json"!==t?e:JSON.stringify(e)}function initRequest(e,t){var n=t.before,r=t.headers,i=t.body,o=t.type,u=_objectWithoutProperties(t,["before","headers","body","type"]);return u.headers=initHeader(r,i,o),u.body=initBody(i,o),n&&n(u),u}function initAction(e,t,n,r){var i=(r.type,r.priority),u=r.skip;return function(r){return shouldSkip(u,r,n)?((0,l.debugLogger)("SKIPPED",n,i),Promise.reject(buildResponse(f.STATUS_SKIP,n))):(n.sent(),(0,l.debugLogger)("SENT",n,i),fetch(e,t).then((0,o.proxy)(shouldCancel,r,n,i)).then((0,o.proxy)(n.received)).then((0,o.proxy)(appendVersion,n)).then(s["default"].contentType))}}Object.defineProperty(t,"__esModule",{value:!0});var r=function(){function defineProperties(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}return function(e,t,n){return t&&defineProperties(e.prototype,t),n&&defineProperties(e,n),e}}(),i="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol?"symbol":typeof e},o=n(5),u=n(6),a=_interopRequireDefault(u),c=n(7),s=_interopRequireDefault(c),f=n(8),l=n(9),d=n(10),p=_interopRequireDefault(d),y=function(){function Ajax(e){var t=this,n=arguments.length<=1||void 0===arguments[1]?{}:arguments[1],r=n.after,i=n.version,u=_objectWithoutProperties(n,["after","version"]);_classCallCheck(this,Ajax),this.__done__=function(e){return t.q=Promise.resolve(e)},this.__cleanup__=function(){t.execute=t.condition=void 0},i=new p["default"](i);var a=initRequest(e,u),c=initAction(e,a,i,u);this.q=new Promise(function(e,n){t.execute=function(i){return c(t.condition).then((0,o.proxy)(i),(0,o.catchProxy)(i)).then((0,o.proxy)(r)).then(t.__done__).then(e)["catch"](n).then(t.__cleanup__)}}),(0,l.debugLogger)("CREATED",i,u.priority)}return r(Ajax,[{key:"cancel",value:function(e){return this.condition=e,this}},{key:"catch",value:function(e){return this.q=this.q["catch"](e),this}},{key:"fail",value:function(e){return this.then((0,o.onFail)(e))}},{key:"success",value:function(e){return this.then((0,o.onSuccess)(e))}},{key:"then",value:function(e){return this.q=this.q.then(e),this}}]),Ajax}();t["default"]=y},function(e,t){"use strict";function proxy(e){for(var t=arguments.length,n=Array(t>1?t-1:0),r=1;r<t;r++)n[r-1]=arguments[r];return e?function(t){return e.apply(void 0,[t].concat(n)),t}:function(e){return e}}function catchProxy(e){for(var t=arguments.length,n=Array(t>1?t-1:0),r=1;r<t;r++)n[r-1]=arguments[r];return e?function(t){throw e.apply(void 0,[t].concat(n)),t}:function(e){throw e}}function conditionalProxy(e,t){return function(n){return t(n)&&e(n),n}}function onFail(e){return conditionalProxy(e,function(e){return e&&e.status>=400})}function onSuccess(e){return conditionalProxy(e,function(e){return e&&e.status<400})}Object.defineProperty(t,"__esModule",{value:!0}),t.proxy=proxy,t.catchProxy=catchProxy,t.conditionalProxy=conditionalProxy,t.onFail=onFail,t.onSuccess=onSuccess},function(e,t){"use strict";function accepts(e){if("json"===e)return{Accept:"application/json"}}function contentType(e,t){if("object"===("undefined"==typeof e?"undefined":n(e))||"json"===t)return{"Content-Type":"application/json"}}Object.defineProperty(t,"__esModule",{value:!0});var n="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol?"symbol":typeof e};t["default"]={contentType:contentType,accepts:accepts}},function(e,t){"use strict";function getContentType(e){var t=e.headers.get("Content-Type");return t&&t.includes("application/json")?"json":"text"}function includeDataType(e){return e._t=getContentType(e),e}function convertDataType(e){return e[e._t]()}function includeAsData(e){return function(t){return e.data=t,e}}function contentType(e){return Promise.resolve(e).then(includeDataType).then(convertDataType).then(includeAsData(e))}Object.defineProperty(t,"__esModule",{value:!0}),t["default"]={contentType:contentType}},function(e,t){"use strict";Object.defineProperty(t,"__esModule",{value:!0});var n="statusText",r="skipped",i="cancelled",o="_v";t.STATUS_KEY=n,t.STATUS_SKIP=r,t.STATUS_CANCEL=i,t.VERSION_KEY=o},function(e,t,n){"use strict";function debugLogger(e,t,n){var i=t.id,o=t.key;(0,r.log)("Orderly",e,{url:o,id:i,priority:n})}Object.defineProperty(t,"__esModule",{value:!0}),t.debugLogger=void 0;var r=n(3);t.debugLogger=debugLogger},function(e,t,n){"use strict";function _classCallCheck(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Object.defineProperty(t,"__esModule",{value:!0});var r=function(){function defineProperties(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}return function(e,t,n){return t&&defineProperties(e.prototype,t),n&&defineProperties(e,n),e}}(),i=n(11),o=function(){function Version(e){var t=this,n=arguments.length<=1||void 0===arguments[1]?{}:arguments[1];_classCallCheck(this,Version),this.sent=function(){return Version.sent(t)},this.received=function(){return Version.received(t)},this.check=n!==!1,this.key=n.name||(n.filterParams?(0,i.filterParams)(e):e),this.id=Version.inc(this.key)}return r(Version,null,[{key:"isOutdated",value:function(e,t){return e.check&&this.get(e.key)[t]>e.id}},{key:"sent",value:function(e){var t=this.get(e.key);if(e.id>t.sent)return t.sent=e.id}},{key:"received",value:function(e){var t=this.get(e.key);if(e.id>t.received)return t.received=e.id}}]),Version}();o.map={},o.get=function(e){return this.map[e]||(this.map[e]={counter:0,sent:0,received:0})},o.inc=function(e){return this.get(e).counter+=1},t["default"]=o},function(e,t){"use strict";function filterParams(e){return e.split("?")[0]}Object.defineProperty(t,"__esModule",{value:!0});new RegExp(/\?.*$/);t.filterParams=filterParams},function(e,t){"use strict";function _classCallCheck(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function initExecute(e){return function(t){return e(t)}}Object.defineProperty(t,"__esModule",{value:!0});var n=function Job(e){var t=arguments.length<=1||void 0===arguments[1]?0:arguments[1];_classCallCheck(this,Job),this.execute=initExecute(e),this.priority=t};t["default"]=n},function(e,t,n){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{"default":e}}function _classCallCheck(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function defaultStrategy(e,t){var n=e.priority,r=void 0===n?0:n,i=e.queueId,o=t.priority,u=void 0===o?0:o,a=t.queueId;return r===u&&a>i||u<r}Object.defineProperty(t,"__esModule",{value:!0});var r="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol?"symbol":typeof e},i=function(){function defineProperties(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}return function(e,t,n){return t&&defineProperties(e.prototype,t),n&&defineProperties(e,n),e}}(),o=n(14),u=_interopRequireDefault(o),a=n(3),c=function(){function Queue(){var e=arguments.length<=0||void 0===arguments[0]?{}:arguments[0],t=e.strategy,n=void 0===t?defaultStrategy:t;_classCallCheck(this,Queue),this.queue=new u["default"](n)}return i(Queue,[{key:"add",value:function(e){if("object"===("undefined"==typeof e?"undefined":r(e))&&"function"==typeof e.execute)return e.queueId=Queue.inc(),this.queue.add(e),e;throw new Error("trying to insert an invalid job",e)}},{key:"get",value:function(){return(0,a.log)("Queue","getting a job",{size:this.size()}),this.queue.poll()}},{key:"isEmpty",value:function(){return this.queue.isEmpty()}},{key:"size",value:function(){return this.queue.size}},{key:"cleanup",value:function(){return this.queue.trim()}}]),Queue}();c.counter=0,c.inc=function(){return this.counter+=1},t["default"]=c},function(e,t,n){(function(e){"use strict";function FastPriorityQueue(e){this.array=[],this.size=0,this.compare=e||t}var t=function(e,t){return e<t};FastPriorityQueue.prototype.add=function(e){var t=this.size;for(this.array[this.size++]=e;t>0;){var n=t-1>>1,r=this.array[n];if(!this.compare(e,r))break;this.array[t]=r,t=n}this.array[t]=e},FastPriorityQueue.prototype.heapify=function(e){this.array=e,this.size=e.length;for(var t=this.size>>1;t>=0;t--)this._percolateDown(t)},FastPriorityQueue.prototype._percolateUp=function(e){for(var t=this.array[e];e>0;){var n=e-1>>1,r=this.array[n];if(!this.compare(t,r))break;this.array[e]=r,e=n}this.array[e]=t},FastPriorityQueue.prototype._percolateDown=function(e){for(var t=this.size,n=this.size>>>1,r=this.array[e];e<n;){var i=(e<<1)+1,o=i+1,u=this.array[i];if(o<t&&this.compare(this.array[o],u)&&(i=o,u=this.array[o]),!this.compare(u,r))break;this.array[e]=u,e=i}this.array[e]=r},FastPriorityQueue.prototype.peek=function(e){return this.array[0]},FastPriorityQueue.prototype.poll=function(e){var t=this.array[0];return this.size>1?(this.array[0]=this.array[--this.size],this._percolateDown(0)):--this.size,t},FastPriorityQueue.prototype.trim=function(){this.array=this.array.slice(0,this.size)},FastPriorityQueue.prototype.isEmpty=function(e){return 0==this.size};var r=function(){var e=new FastPriorityQueue(function(e,t){return e<t});for(e.add(1),e.add(0),e.add(5),e.add(4),e.add(3);!e.isEmpty();)console.log(e.poll())};n.c[0]===e&&r(),e.exports=FastPriorityQueue}).call(t,n(15)(e))},function(e,t){"use strict";e.exports=function(e){return e.webpackPolyfill||(e.deprecate=function(){},e.paths=[],e.children=[],e.webpackPolyfill=1),e}},function(e,t){"use strict";function _classCallCheck(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Object.defineProperty(t,"__esModule",{value:!0});var n=function(){function defineProperties(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}return function(e,t,n){return t&&defineProperties(e.prototype,t),n&&defineProperties(e,n),e}}(),r=function(){function Worker(e){var t=this,n=arguments.length<=1||void 0===arguments[1]?{}:arguments[1],r=n.sleep,i=void 0===r?32:r,o=n.max,u=void 0===o?8:o;_classCallCheck(this,Worker),this.start=function(){for(;t.pending<t.max&&!t.queue.isEmpty();){t.pending+=1;var e=t.queue.get();setTimeout(e.execute,0,t.complete)}t.queue.cleanup(),t["continue"]&&(t.setTimeout=setTimeout(t.start,t.sleep))},this.complete=function(){t.pending-=1},this.queue=e,this.sleep=i,this.max=u,this.pending=0,this["continue"]=!0}return n(Worker,[{key:"stop",value:function(){this["continue"]=!1,clearTimeout(this.setTimeout)}}]),Worker}();t["default"]=r}])});
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define("Orderly", [], factory);
+	else if(typeof exports === 'object')
+		exports["Orderly"] = factory();
+	else
+		root["Orderly"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(1);
+
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+		module.exports = __webpack_require__(2);
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _debug = __webpack_require__(3);
+
+	var _ajax = __webpack_require__(4);
+
+	var _ajax2 = _interopRequireDefault(_ajax);
+
+	var _job = __webpack_require__(12);
+
+	var _job2 = _interopRequireDefault(_job);
+
+	var _queue = __webpack_require__(13);
+
+	var _queue2 = _interopRequireDefault(_queue);
+
+	var _worker = __webpack_require__(16);
+
+	var _worker2 = _interopRequireDefault(_worker);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Orderly = function () {
+
+	  // ============================================
+	  // PUBLIC INTERFACE
+	  // ============================================
+
+	  // ============================================
+	  // CLASS SHARED VERIABLES
+	  // ============================================
+
+	  function Orderly() {
+	    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	    _classCallCheck(this, Orderly);
+
+	    this.options = options;
+	  }
+
+	  // ============================================
+	  // CLASS FUNCTIONS
+	  // ============================================
+
+	  // ============================================
+	  // SET DEBUG MODE
+	  // ============================================
+
+	  _createClass(Orderly, [{
+	    key: 'withOptions',
+	    value: function withOptions() {
+	      var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	      return new Orderly(_extends({}, this.options, options));
+	    }
+	  }, {
+	    key: 'after',
+	    value: function after(callback) {
+	      if (typeof callback !== 'function') throw "Invalid Function Call #after";
+	      this.options.after = callback;
+	      return this;
+	    }
+	  }, {
+	    key: 'before',
+	    value: function before(callback) {
+	      if (typeof callback !== 'function') throw "Invalid Function Call #before";
+	      this.options.before = callback;
+	      return this;
+	    }
+	  }, {
+	    key: 'ajax',
+	    value: function ajax(url) {
+	      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      if (!url) throw "Invalid URL: url is undefined";
+
+	      var req = new _ajax2.default(url, Object.assign({}, this.options, options));
+	      var job = new _job2.default(req.execute, options.priority);
+
+	      Orderly.queue.add(job);
+
+	      return req;
+	    }
+	  }, {
+	    key: 'get',
+	    value: function get(url) {
+	      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      return this.ajax(url, Object.assign(options, { method: 'GET' }));
+	    }
+	  }, {
+	    key: 'post',
+	    value: function post(url) {
+	      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      return this.ajax(url, Object.assign(options, { method: 'POST' }));
+	    }
+	  }, {
+	    key: 'put',
+	    value: function put(url) {
+	      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      return this.ajax(url, Object.assign(options, { method: 'PUT' }));
+	    }
+	  }, {
+	    key: 'del',
+	    value: function del(url) {
+	      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      return this.ajax(url, Object.assign(options, { method: 'DELETE' }));
+	    }
+	  }]);
+
+	  return Orderly;
+	}();
+
+	Orderly.debugMode = function (bool) {
+	  (0, _debug.setMode)(bool);
+	  return this;
+	};
+
+	Orderly.queue = undefined;
+	Orderly.worker = undefined;
+	Orderly.global = undefined;
+
+	Orderly.start = function () {
+	  var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	  var max = _ref.max;
+	  var sleep = _ref.sleep;
+
+	  if (!this.worker) {
+	    this.queue = new _queue2.default();
+	    this.worker = new _worker2.default(this.queue, { max: max, sleep: sleep });
+	    this.default = new Orderly();
+	  }
+
+	  this.worker.start();
+
+	  return this.default;
+	};
+
+	Orderly.pause = function () {
+	  if (this.worker) this.worker.stop();
+	};
+
+	Orderly.stop = function () {
+	  this.pause();
+	  this.queue = this.worker = this.default = undefined;
+	};
+
+		exports.default = Orderly;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	var mode = false;
+
+	function setMode(boolean) {
+	  return mode = boolean;
+	}
+
+	function getMode() {
+	  return mode;
+	}
+
+	function log(klass, action) {
+	  var args = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+	  if (mode) {
+	    var msg = Object.keys(args).reduce(function (msg, key) {
+	      var value = args[key];
+	      if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') value = JSON.stringify(value);
+	      return msg + ' ' + key + ':' + value;
+	    }, klass);
+
+	    msg = msg + ' ' + action;
+
+	    console.log(msg);
+	  }
+	}
+
+	exports.setMode = setMode;
+	exports.getMode = getMode;
+		exports.log = log;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	var _callbacks = __webpack_require__(5);
+
+	var _request = __webpack_require__(6);
+
+	var _request2 = _interopRequireDefault(_request);
+
+	var _response = __webpack_require__(7);
+
+	var _response2 = _interopRequireDefault(_response);
+
+	var _constants = __webpack_require__(8);
+
+	var _misc = __webpack_require__(9);
+
+	var _version = __webpack_require__(10);
+
+	var _version2 = _interopRequireDefault(_version);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	function abortResponse(version, sent) {
+	  var _ref;
+
+	  return _ref = {}, _defineProperty(_ref, _constants.VERSION_KEY, version), _defineProperty(_ref, 'aborted', true), _defineProperty(_ref, 'sent', sent), _ref;
+	}
+
+	function conditionMet(condition, arg) {
+	  return typeof condition === 'function' && condition(arg);
+	}
+
+	function shouldSkip(skip, condition, version) {
+	  return skip !== false && (_version2.default.isOutdated(version, 'sent') || conditionMet(condition));
+	}
+
+	function shouldCancel(resp, condition, version, priority) {
+	  if (_version2.default.isOutdated(version, 'received') || conditionMet(condition, resp)) {
+	    var _resp = abortResponse(version, true);
+	    throw _resp;
+	  }
+	}
+
+	function appendVersion(resp, value) {
+	  resp[_constants.VERSION_KEY] = value;
+	}
+
+	function initHeader() {
+	  var headers = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	  var body = arguments[1];
+	  var type = arguments[2];
+
+	  return Object.assign(headers, _request2.default.accepts(type), _request2.default.contentType(body, type));
+	}
+
+	function initBody(body, type) {
+	  return body && ((typeof body === 'undefined' ? 'undefined' : _typeof(body)) === 'object' || type === 'json') ? JSON.stringify(body) : body;
+	}
+
+	function initRequest(url, _ref2) {
+	  var before = _ref2.before;
+	  var headers = _ref2.headers;
+	  var body = _ref2.body;
+	  var type = _ref2.type;
+
+	  var options = _objectWithoutProperties(_ref2, ['before', 'headers', 'body', 'type']);
+
+	  options.headers = initHeader(headers, body, type);
+	  options.body = initBody(body, type);
+
+	  if (before) before(options);
+
+	  return options;
+	}
+
+	function initAction(url, request, version, _ref3) {
+	  var type = _ref3.type;
+	  var priority = _ref3.priority;
+	  var skip = _ref3.skip;
+
+	  return function (condition) {
+	    if (shouldSkip(skip, condition, version)) {
+	      var resp = abortResponse(version, false);
+	      return Promise.reject(resp);
+	    }
+
+	    version.sent();
+	    (0, _misc.debugLogger)('SENT', version, priority);
+
+	    return fetch(url, request).then((0, _callbacks.proxy)(shouldCancel, condition, version, priority)).then((0, _callbacks.proxy)(version.received)).then((0, _callbacks.proxy)(appendVersion, version)).then(_response2.default.contentType);
+	  };
+	}
+
+	var Ajax = function () {
+	  function Ajax(url) {
+	    var _this = this;
+
+	    var _ref4 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	    var after = _ref4.after;
+	    var version = _ref4.version;
+
+	    var options = _objectWithoutProperties(_ref4, ['after', 'version']);
+
+	    _classCallCheck(this, Ajax);
+
+	    _initialiseProps.call(this);
+
+	    version = new _version2.default(url, version);
+	    var request = initRequest(url, options);
+	    var action = initAction(url, request, version, options);
+
+	    this.q = new Promise(function (resolve, reject) {
+	      _this.execute = function (callback) {
+	        return action(_this.abortCondition).then((0, _callbacks.proxy)(callback), (0, _callbacks.catchProxy)(callback)).then((0, _callbacks.proxy)(after)).then(_this.__done__).then(resolve).catch(_this.__abort__(version, options)).catch(reject).then(_this.__cleanup__);
+	      };
+	    });
+
+	    (0, _misc.debugLogger)('CREATED', version, options.priority);
+	  }
+
+	  _createClass(Ajax, [{
+	    key: 'abort',
+	    value: function abort(callback) {
+	      this.abortCallback = callback;
+	      return this;
+	    }
+	  }, {
+	    key: 'abortWhen',
+	    value: function abortWhen(callback) {
+	      this.abortCondition = callback;
+	      return this;
+	    }
+	  }, {
+	    key: 'catch',
+	    value: function _catch(callback) {
+	      this.q = this.q.catch(callback);
+	      return this;
+	    }
+	  }, {
+	    key: 'fail',
+	    value: function fail(callback) {
+	      return this.then((0, _callbacks.onFail)(callback));
+	    }
+	  }, {
+	    key: 'success',
+	    value: function success(callback) {
+	      return this.then((0, _callbacks.onSuccess)(callback));
+	    }
+	  }, {
+	    key: 'then',
+	    value: function then(callback) {
+	      this.q = this.q.then(callback);
+	      return this;
+	    }
+	  }]);
+
+	  return Ajax;
+	}();
+
+	var _initialiseProps = function _initialiseProps() {
+	  var _this2 = this;
+
+	  this.__done__ = function (resp) {
+	    return _this2.q = Promise.resolve(resp);
+	  };
+
+	  this.__cleanup__ = function () {
+	    _this2.execute = _this2.abortCallback = _this2.abortCondition = undefined;
+	  };
+
+	  this.__abort__ = function (version, _ref5) {
+	    var priority = _ref5.priority;
+
+	    return function (err) {
+	      if (err.aborted) {
+	        (0, _misc.debugLogger)('ABORTED', version, priority);
+	        if (typeof _this2.abortCallback === 'function') _this2.abortCallback(err);
+	      } else {
+	        throw err;
+	      }
+	    };
+	  };
+	};
+
+		exports.default = Ajax;
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	function proxy(callback) {
+	  for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	    args[_key - 1] = arguments[_key];
+	  }
+
+	  if (!callback) {
+	    return function (resp) {
+	      return resp;
+	    };
+	  } else {
+	    return function (resp) {
+	      callback.apply(undefined, [resp].concat(args));
+	      return resp;
+	    };
+	  }
+	}
+
+	function catchProxy(callback) {
+	  for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+	    args[_key2 - 1] = arguments[_key2];
+	  }
+
+	  if (!callback) {
+	    return function (err) {
+	      throw err;
+	    };
+	  } else {
+	    return function (err) {
+	      callback.apply(undefined, [err].concat(args));
+	      throw err;
+	    };
+	  }
+	}
+
+	function conditionalProxy(callback, condition) {
+	  return function (resp) {
+	    if (condition(resp)) callback(resp);
+	    return resp;
+	  };
+	}
+
+	function onFail(callback) {
+	  return conditionalProxy(callback, function (resp) {
+	    return resp && resp.status >= 400;
+	  });
+	}
+
+	function onSuccess(callback) {
+	  return conditionalProxy(callback, function (resp) {
+	    return resp && resp.status < 400;
+	  });
+	}
+
+	exports.proxy = proxy;
+	exports.catchProxy = catchProxy;
+	exports.conditionalProxy = conditionalProxy;
+	exports.onFail = onFail;
+		exports.onSuccess = onSuccess;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	function accepts(type) {
+	  if (type === 'json') return { 'Accept': 'application/json' };
+	}
+
+	function contentType(body, type) {
+	  if ((typeof body === 'undefined' ? 'undefined' : _typeof(body)) === 'object' || type === 'json') return { 'Content-Type': 'application/json' };
+	}
+
+	exports.default = { contentType: contentType, accepts: accepts };
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	function getContentType(resp) {
+	  var ct = resp.headers.get('Content-Type');
+
+	  if (ct && ct.includes('application/json')) {
+	    return 'json';
+	  }
+
+	  return 'text';
+	}
+
+	function includeDataType(resp) {
+	  resp['_t'] = getContentType(resp);
+	  return resp;
+	}
+
+	function convertDataType(resp) {
+	  return resp[resp._t]();
+	}
+
+	function includeAsData(resp) {
+	  return function (data) {
+	    resp['data'] = data;
+	    return resp;
+	  };
+	}
+
+	function contentType(resp) {
+	  return Promise.resolve(resp).then(includeDataType).then(convertDataType).then(includeAsData(resp));
+	}
+
+	exports.default = { contentType: contentType };
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var STATUS_KEY = 'statusText';
+	var STATUS_SKIP = 'skipped';
+	var STATUS_CANCEL = 'cancelled';
+	var VERSION_KEY = '_v';
+
+	exports.STATUS_KEY = STATUS_KEY;
+	exports.STATUS_SKIP = STATUS_SKIP;
+	exports.STATUS_CANCEL = STATUS_CANCEL;
+		exports.VERSION_KEY = VERSION_KEY;
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.debugLogger = undefined;
+
+	var _debug = __webpack_require__(3);
+
+	function debugLogger(action, _ref, priority) {
+	  var id = _ref.id;
+	  var url = _ref.key;
+
+	  (0, _debug.log)('Orderly', action, { url: url, id: id, priority: priority });
+	}
+
+	exports.debugLogger = debugLogger;
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _url = __webpack_require__(11);
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Version = function () {
+	  _createClass(Version, null, [{
+	    key: 'isOutdated',
+	    value: function isOutdated(version, action) {
+	      return version.check && this.get(version.key)[action] > version.id;
+	    }
+	  }, {
+	    key: 'sent',
+	    value: function sent(version) {
+	      var record = this.get(version.key);
+	      if (version.id > record.sent) {
+	        return record.sent = version.id;
+	      }
+	    }
+	  }, {
+	    key: 'received',
+	    value: function received(version) {
+	      var record = this.get(version.key);
+	      if (version.id > record.received) {
+	        return record.received = version.id;
+	      }
+	    }
+	  }]);
+
+	  function Version(url) {
+	    var _this = this;
+
+	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	    _classCallCheck(this, Version);
+
+	    this.sent = function () {
+	      return Version.sent(_this);
+	    };
+
+	    this.received = function () {
+	      return Version.received(_this);
+	    };
+
+	    this.check = options !== false;
+	    this.key = options.name || (options.filterParams ? (0, _url.filterParams)(url) : url);
+	    this.id = Version.inc(this.key);
+	  }
+
+	  return Version;
+	}();
+
+	Version.map = {};
+
+	Version.get = function (key) {
+	  return this.map[key] || (this.map[key] = { counter: 0, sent: 0, received: 0 });
+	};
+
+	Version.inc = function (key) {
+	  return this.get(key).counter += 1;
+	};
+
+		exports.default = Version;
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var PARAMS_FORMAT = new RegExp(/\?.*$/);
+
+	function filterParams(url) {
+	  return url.split('?')[0];
+	}
+
+	exports.filterParams = filterParams;
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function initExecute(execute) {
+	  return function (callback) {
+	    return execute(callback);
+	  };
+	}
+
+	var Job = function Job(execute) {
+	  var priority = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+
+	  _classCallCheck(this, Job);
+
+	  this.execute = initExecute(execute);
+	  this.priority = priority;
+	};
+
+		exports.default = Job;
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _fastpriorityqueue = __webpack_require__(14);
+
+	var _fastpriorityqueue2 = _interopRequireDefault(_fastpriorityqueue);
+
+	var _debug = __webpack_require__(3);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function defaultStrategy(_ref, _ref2) {
+	  var _ref$priority = _ref.priority;
+	  var p1 = _ref$priority === undefined ? 0 : _ref$priority;
+	  var qId1 = _ref.queueId;
+	  var _ref2$priority = _ref2.priority;
+	  var p2 = _ref2$priority === undefined ? 0 : _ref2$priority;
+	  var qId2 = _ref2.queueId;
+
+
+	  return p1 === p2 && qId2 > qId1 || p2 < p1;
+	}
+
+	var Queue = function () {
+	  function Queue() {
+	    var _ref3 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	    var _ref3$strategy = _ref3.strategy;
+	    var strategy = _ref3$strategy === undefined ? defaultStrategy : _ref3$strategy;
+
+	    _classCallCheck(this, Queue);
+
+	    this.queue = new _fastpriorityqueue2.default(strategy);
+	  }
+
+	  _createClass(Queue, [{
+	    key: 'add',
+	    value: function add(obj) {
+	      if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object' && typeof obj.execute === 'function') {
+	        obj.queueId = Queue.inc();
+	        this.queue.add(obj);
+	        return obj;
+	      } else {
+	        throw new Error('trying to insert an invalid job', obj);
+	      }
+	    }
+	  }, {
+	    key: 'get',
+	    value: function get() {
+	      (0, _debug.log)('Queue', 'getting a job', { size: this.size() });
+	      return this.queue.poll();
+	    }
+	  }, {
+	    key: 'isEmpty',
+	    value: function isEmpty() {
+	      return this.queue.isEmpty();
+	    }
+	  }, {
+	    key: 'size',
+	    value: function size() {
+	      return this.queue.size;
+	    }
+	  }, {
+	    key: 'cleanup',
+	    value: function cleanup() {
+	      return this.queue.trim();
+	    }
+	  }]);
+
+	  return Queue;
+	}();
+
+	Queue.counter = 0;
+
+	Queue.inc = function () {
+	  return this.counter += 1;
+	};
+
+		exports.default = Queue;
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/**
+	 * FastPriorityQueue.js : a fast heap-based priority queue  in JavaScript.
+	 * (c) the authors
+	 * Licensed under the Apache License, Version 2.0.
+	 *
+	 * Speed-optimized heap-based priority queue for modern browsers and JavaScript engines.
+	 *
+	 * Usage :
+	         Installation (in shell, if you use node):
+	         $ npm install fastpriorityqueue
+
+	         Running test program (in JavaScript):
+
+	         // var FastPriorityQueue = require("fastpriorityqueue");// in node
+	         var x = new FastPriorityQueue();
+	         x.add(1);
+	         x.add(0);
+	         x.add(5);
+	         x.add(4);
+	         x.add(3);
+	         x.peek(); // should return 0, leaves x unchanged
+	         x.size; // should return 5, leaves x unchanged
+	         while(!x.isEmpty()) {
+	           console.log(x.poll());
+	         } // will print 0 1 3 4 5
+	         x.trim(); // (optional) optimizes memory usage
+	 */
+	'use strict';
+
+	var defaultcomparator = function defaultcomparator(a, b) {
+	    return a < b;
+	};
+
+	// the provided comparator function should take a, b and return *true* when a < b
+	function FastPriorityQueue(comparator) {
+	    this.array = [];
+	    this.size = 0;
+	    this.compare = comparator || defaultcomparator;
+	}
+
+	// Add an element the the queue
+	// runs in O(log n) time
+	FastPriorityQueue.prototype.add = function (myval) {
+	    var i = this.size;
+	    this.array[this.size++] = myval;
+	    while (i > 0) {
+	        var p = i - 1 >> 1;
+	        var ap = this.array[p];
+	        if (!this.compare(myval, ap)) break;
+	        this.array[i] = ap;
+	        i = p;
+	    }
+	    this.array[i] = myval;
+	};
+
+	// replace the content of the heap by provided array and "heapifies it"
+	FastPriorityQueue.prototype.heapify = function (arr) {
+	    this.array = arr;
+	    this.size = arr.length;
+	    for (var i = this.size >> 1; i >= 0; i--) {
+	        this._percolateDown(i);
+	    }
+	};
+
+	// for internal use
+	FastPriorityQueue.prototype._percolateUp = function (i) {
+	    var myval = this.array[i];
+	    while (i > 0) {
+	        var p = i - 1 >> 1;
+	        var ap = this.array[p];
+	        if (!this.compare(myval, ap)) break;
+	        this.array[i] = ap;
+	        i = p;
+	    }
+	    this.array[i] = myval;
+	};
+
+	// for internal use
+	FastPriorityQueue.prototype._percolateDown = function (i) {
+	    var size = this.size;
+	    var hsize = this.size >>> 1;
+	    var ai = this.array[i];
+	    while (i < hsize) {
+	        var l = (i << 1) + 1;
+	        var r = l + 1;
+	        var bestc = this.array[l];
+	        if (r < size) {
+	            if (this.compare(this.array[r], bestc)) {
+	                l = r;
+	                bestc = this.array[r];
+	            }
+	        }
+	        if (!this.compare(bestc, ai)) {
+	            break;
+	        }
+	        this.array[i] = bestc;
+	        i = l;
+	    }
+	    this.array[i] = ai;
+	};
+
+	// Look at the top of the queue (a smallest element)
+	// executes in constant time
+	//
+	// This function assumes that the priority queue is
+	// not empty and the caller is resposible for the check. 
+	// You can use an expression such as
+	// "isEmpty() ? undefined : peek()"
+	// if you expect to be calling peek on an empty priority queue.
+	// 
+	FastPriorityQueue.prototype.peek = function (t) {
+	    return this.array[0];
+	};
+
+	// remove the element on top of the heap (a smallest element)
+	// runs in logarithmic time
+	//
+	//
+	// This function assumes that the priority queue is
+	// not empty, and the caller is responsible for the check. 
+	// You can use an expression such as
+	// "isEmpty() ? undefined : poll()"
+	// if you expect to be calling poll on an empty priority queue.
+	//
+	// For long-running and large priority queues, or priority queues
+	// storing large objects, you may  want to call the trim function
+	// at strategic times to recover allocated memory.
+	FastPriorityQueue.prototype.poll = function (i) {
+	    var ans = this.array[0];
+	    if (this.size > 1) {
+	        this.array[0] = this.array[--this.size];
+	        this._percolateDown(0 | 0);
+	    } else --this.size;
+	    return ans;
+	};
+
+	// recover unused memory (for long-running priority queues)
+	FastPriorityQueue.prototype.trim = function () {
+	    this.array = this.array.slice(0, this.size);
+	};
+
+	// Check whether the heap is empty
+	FastPriorityQueue.prototype.isEmpty = function (i) {
+	    return this.size == 0;
+	};
+
+	// just for illustration purposes
+	var main = function main() {
+	    // main code
+	    var x = new FastPriorityQueue(function (a, b) {
+	        return a < b;
+	    });
+	    x.add(1);
+	    x.add(0);
+	    x.add(5);
+	    x.add(4);
+	    x.add(3);
+	    while (!x.isEmpty()) {
+	        console.log(x.poll());
+	    }
+	};
+
+	if (__webpack_require__.c[0] === module) {
+	    main();
+	}
+
+	module.exports = FastPriorityQueue;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(15)(module)))
+
+/***/ },
+/* 15 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	module.exports = function (module) {
+		if (!module.webpackPolyfill) {
+			module.deprecate = function () {};
+			module.paths = [];
+			// module.parent = undefined by default
+			module.children = [];
+			module.webpackPolyfill = 1;
+		}
+		return module;
+	};
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Worker = function () {
+	  function Worker(queue) {
+	    var _this = this;
+
+	    var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	    var _ref$sleep = _ref.sleep;
+	    var sleep = _ref$sleep === undefined ? 32 : _ref$sleep;
+	    var _ref$max = _ref.max;
+	    var max = _ref$max === undefined ? 8 : _ref$max;
+
+	    _classCallCheck(this, Worker);
+
+	    this.start = function () {
+	      while (_this.pending < _this.max && !_this.queue.isEmpty()) {
+	        _this.pending += 1;
+	        var job = _this.queue.get();
+
+	        setTimeout(job.execute, 0, _this.complete);
+	      }
+
+	      _this.queue.cleanup();
+
+	      if (_this.continue) _this.setTimeout = setTimeout(_this.start, _this.sleep);
+	    };
+
+	    this.complete = function () {
+	      _this.pending -= 1;
+	    };
+
+	    this.queue = queue;
+	    this.sleep = sleep;
+	    this.max = max;
+
+	    this.pending = 0;
+	    this.continue = true;
+	  }
+
+	  _createClass(Worker, [{
+	    key: "stop",
+	    value: function stop() {
+	      this.continue = false;
+	      clearTimeout(this.setTimeout);
+	    }
+	  }]);
+
+	  return Worker;
+	}();
+
+		exports.default = Worker;
+
+/***/ }
+/******/ ])
+});
+;
 //# sourceMappingURL=index.js.map

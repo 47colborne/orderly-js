@@ -8,12 +8,11 @@ import { debugLogger } from './misc'
 
 import Version from './version'
 
-function buildResponse(status, version) {
+function abortResponse(version, sent) {
   return {
-    [STATUS_KEY]: status,
     [VERSION_KEY]: version,
-    skipped: STATUS_SKIP === status,
-    cancelled: STATUS_CANCEL === status
+    aborted: true,
+    sent: sent
   }
 }
 
@@ -27,10 +26,8 @@ function shouldSkip(skip, condition, version) {
 
 function shouldCancel(resp, condition, version, priority) {
   if (Version.isOutdated(version, 'received') || conditionMet(condition, resp)) {
-    debugLogger('CANCELLED', version, priority)
-    throw(buildResponse(STATUS_CANCEL, version))
-  } else {
-    debugLogger('RECEIVED', version, priority)
+    let resp = abortResponse(version, true)
+    throw(resp)
   }
 }
 
@@ -62,8 +59,8 @@ function initRequest(url, { before, headers, body, type, ...options }) {
 function initAction(url, request, version, { type, priority, skip }) {
   return function(condition) {
     if (shouldSkip(skip, condition, version)) {
-      debugLogger('SKIPPED', version, priority)
-      return Promise.reject(buildResponse(STATUS_SKIP, version))
+      let resp = abortResponse(version, false)
+      return Promise.reject(resp)
     }
 
     version.sent()
@@ -79,17 +76,18 @@ function initAction(url, request, version, { type, priority, skip }) {
 
 class Ajax {
   constructor(url, { after, version, ...options } = {}) {
-    version = new Version(version)
+    version = new Version(url, version)
     let request = initRequest(url, options)
     let action = initAction(url, request, version, options)
 
     this.q = new Promise((resolve, reject) => {
       this.execute = (callback) => {
-        return action(this.condition)
+        return action(this.abortCondition)
           .then(proxy(callback), catchProxy(callback))
           .then(proxy(after))
           .then(this.__done__)
           .then(resolve)
+          .catch(this.__abort__(version, options))
           .catch(reject)
           .then(this.__cleanup__)
       }
@@ -103,11 +101,28 @@ class Ajax {
   }
 
   __cleanup__ = () => {
-    this.execute = this.condition = undefined
+    this.execute = this.abortCallback = this.abortCondition = undefined
   }
 
-  cancel(callback) {
-    this.condition = callback
+  __abort__ = (version, { priority }) => {
+    return (err) => {
+      if (err.aborted) {
+        debugLogger('ABORTED', version, priority)
+        if (typeof this.abortCallback === 'function')
+          this.abortCallback(err)
+      } else {
+        throw(err)
+      }
+    }
+  }
+
+  abort(callback) {
+    this.abortCallback = callback
+    return this
+  }
+
+  abortWhen(callback) {
+    this.abortCondition = callback
     return this
   }
 
