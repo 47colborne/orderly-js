@@ -8,51 +8,51 @@ describe('Queue', function() {
     return { priority, execute }
   }
 
-  let queue = new Queue()
-  beforeEach(function() { queue = new Queue })
+  let queue = Queue.init()
+  beforeEach(function() { queue = Queue.init() })
 
-  describe('#add', function() {
+  describe('add', function() {
     it('accepts a job with action', function() {
-      expect(() => queue.add(stubJob())).to.increase(queue.queue, 'size')
+      expect(() => Queue.add(queue, stubJob())).to.increase(queue.q, 'size')
     })
 
     it('returns the job', function() {
       let job = stubJob()
-      expect(queue.add(job)).to.eq(job)
+      expect(Queue.add(queue, job)).to.eq(job)
     })
 
-    it('thorws an error if invalid job is inserted', function() {
-      expect(() => queue.add('invalid job')).to.throw(Error)
+    it('thorws TypeError if invalid job is inserted', function() {
+      expect(() => Queue.add(queue, 'invalid job')).to.throw(TypeError)
     })
   })
 
-  describe('#get', function() {
+  describe('get', function() {
     it('behaves like FIFO queue with same priority', function() {
       let job1 = stubJob(0)
       let job2 = stubJob(0)
       let job3 = stubJob(0)
       let job4 = stubJob(0)
 
-      queue.add(job1)
-      queue.add(job2)
-      queue.add(job3)
-      queue.add(job4)
+      Queue.add(queue, job1)
+      Queue.add(queue, job2)
+      Queue.add(queue, job3)
+      Queue.add(queue, job4)
 
-      expect(queue.get()).to.eq(job1)
-      expect(queue.get()).to.eq(job2)
-      expect(queue.get()).to.eq(job3)
-      expect(queue.get()).to.eq(job4)
+      expect(Queue.get(queue)).to.eq(job1)
+      expect(Queue.get(queue)).to.eq(job2)
+      expect(Queue.get(queue)).to.eq(job3)
+      expect(Queue.get(queue)).to.eq(job4)
     })
 
     it('returns a job with any priority first', function() {
       let noPriorityJob = stubJob(undefined)
       let highPriorityJob = stubJob(10)
 
-      queue.add(noPriorityJob)
-      queue.add(highPriorityJob)
+      Queue.add(queue, noPriorityJob)
+      Queue.add(queue, highPriorityJob)
 
-      expect(queue.get()).to.eq(highPriorityJob)
-      expect(queue.get()).to.eq(noPriorityJob)
+      expect(Queue.get(queue)).to.eq(highPriorityJob)
+      expect(Queue.get(queue)).to.eq(noPriorityJob)
     })
 
     it('returns a job with highest priority first', function() {
@@ -61,33 +61,33 @@ describe('Queue', function() {
       let highPriorityJob1 = stubJob(10)
       let highPriorityJob2 = stubJob(10)
 
-      queue.add(lowPriorityJob)
-      queue.add(midPriorityJob)
-      queue.add(highPriorityJob1)
-      queue.add(highPriorityJob2)
+      Queue.add(queue, lowPriorityJob)
+      Queue.add(queue, midPriorityJob)
+      Queue.add(queue, highPriorityJob1)
+      Queue.add(queue, highPriorityJob2)
 
-      expect(queue.get()).to.eq(highPriorityJob1)
-      expect(queue.get()).to.eq(highPriorityJob2)
-      expect(queue.get()).to.eq(midPriorityJob)
-      expect(queue.get()).to.eq(lowPriorityJob)
+      expect(Queue.get(queue)).to.eq(highPriorityJob1)
+      expect(Queue.get(queue)).to.eq(highPriorityJob2)
+      expect(Queue.get(queue)).to.eq(midPriorityJob)
+      expect(Queue.get(queue)).to.eq(lowPriorityJob)
     })
 
     context('when queue is empty', function() {
       it('returns undefined', function() {
-        expect(queue.isEmpty()).to.eq(true)
-        expect(queue.get()).to.eq(undefined)
+        expect(Queue.isEmpty(queue)).to.eq(true)
+        expect(Queue.get(queue)).to.eq(undefined)
       })
     })
   })
 
   describe('#isEmpty', function() {
     it('returns true when queue is empty', function() {
-      expect(queue.isEmpty()).to.eq(true)
+      expect(Queue.isEmpty(queue)).to.eq(true)
     })
 
     it('returns false when queue is not empty', function() {
-      queue.add(stubJob())
-      expect(queue.isEmpty()).to.eq(false)
+      Queue.add(queue, stubJob())
+      expect(Queue.isEmpty(queue)).to.eq(false)
     })
   })
 
@@ -96,17 +96,17 @@ describe('Queue', function() {
       let size = Math.floor(Math.random() * 10 + 1)
       let jobs = new Array(size)
         .fill(undefined)
-        .forEach(() => queue.add(stubJob()))
+        .forEach(() => Queue.add(queue, stubJob()))
 
-      expect(queue.size()).to.eq(size)
+      expect(Queue.size(queue)).to.eq(size)
     })
   })
 
   describe('#cleanup', function() {
     it('should trigger FastPriorityQueue#trim', function() {
-      queue.queue.trim = sinon.spy()
-      queue.cleanup()
-      expect(queue.queue.trim).to.have.been.called
+      sinon.spy(queue.q, 'trim')
+      Queue.cleanup(queue)
+      expect(queue.q.trim).to.have.been.called
     })
   })
 })

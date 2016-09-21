@@ -32,7 +32,7 @@ class Orderly {
 
   static start = function({ max, sleep } = {}) {
     if (!this.worker) {
-      this.queue = new Queue
+      this.queue = Queue.init()
       this.worker = new Worker(this.queue, { max, sleep })
       this.default = new Orderly()
     }
@@ -81,7 +81,7 @@ class Orderly {
     let req = new Ajax(url, Object.assign({}, this.options, options))
     let job = Job.init(req.execute, options.priority)
 
-    Orderly.queue.add(job)
+    Queue.add(Orderly.queue, job)
 
     return req
   }

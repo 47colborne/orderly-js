@@ -1,3 +1,5 @@
+import Queue from './queue'
+
 class Worker {
   constructor(queue, { sleep = 32, max = 8 } = {}) {
     this.queue = queue
@@ -9,14 +11,14 @@ class Worker {
   }
 
   start = () => {
-    while (this.pending < this.max && !this.queue.isEmpty()) {
+    while (this.pending < this.max && !Queue.isEmpty(this.queue)) {
       this.pending += 1
-      let job = this.queue.get()
+      let job = Queue.get(this.queue)
 
       setTimeout(job.execute, 0, this.complete)
     }
 
-    this.queue.cleanup()
+    Queue.cleanup(this.queue)
 
     if (this.continue)
       this.setTimeout = setTimeout(this.start, this.sleep)
@@ -28,6 +30,7 @@ class Worker {
   }
 
   complete = () => {
+    console.log('COMPLETED')
     this.pending -= 1
   }
 }
