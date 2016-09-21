@@ -79,7 +79,7 @@ class Orderly {
     if (!url) throw "Invalid URL: url is undefined"
 
     let req = new Ajax(url, Object.assign({}, this.options, options))
-    let job = new Job(req.execute, options.priority)
+    let job = Job.init(req.execute, options.priority)
 
     Orderly.queue.add(job)
 

@@ -1,14 +1,8 @@
-function initExecute(execute) {
-  return function(callback) {
-    return execute(callback)
-  }
+function init(execute, priority = 0) {
+  if (typeof execute !== 'function')
+    throw new TypeError('First argument in Job.init must an function')
+
+  return { execute, priority }
 }
 
-class Job {
-  constructor(execute , priority = 0) {
-    this.execute = initExecute(execute)
-    this.priority = priority
-  }
-}
-
-export default Job
+export default { init }
