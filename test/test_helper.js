@@ -23,4 +23,10 @@ global.navigator = { userAgent: 'node.js' }
 let fetch = require('node-fetch')
 global.fetch = fetch
 
-export { assert, expect, lib, sinon }
+function spy(object, func, callback) {
+  let backup = object[func]
+  callback(object[func] = sinon.spy())
+  object[func] = backup
+}
+
+export { assert, expect, lib, sinon, spy }

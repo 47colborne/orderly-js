@@ -1,127 +1,146 @@
-import { assert, expect, lib, sinon } from '../test_helper'
+import { assert, expect, lib, sinon, spy } from '../test_helper'
 
-let Job = lib.src('orderly/job')
-let Queue = lib.src('orderly/queue')
-let Worker = lib.src('orderly/worker')
+let Job = lib.src('orderly/job').default
+let Queue = lib.src('orderly/queue').default
+let Worker = lib.src('orderly/worker').default
 
 describe('Worker', function() {
 
-  // let worker = new Worker(new Queue)
+  beforeEach(function() {
+    this.clock = sinon.useFakeTimers()
+  })
 
-  // beforeEach(function() {
-  //   this.clock = sinon.useFakeTimers()
-  // })
+  afterEach(function() {
+    this.clock.restore()
+  })
 
-  // afterEach(function() {
-  //   // worker = new Worker(new Queue)
-  //   this.clock.restore
-  // })
+  describe('init', function() {
+    let queue = Queue.init()
+    let options = { sleep: 100, max: 10 }
+    let worker = Worker.init(queue, options)
 
-  // describe('on initialize', function() {
-  //   it('starts polling', function() {
-  //     // let spy = sinon.spy()
-  //     Worker.__set__('start', () => { console.log('wasup') })
+    it('returns an object with queue', function() {
+      expect(worker.queue).to.eq(queue)
+    })
 
-  //     let worker = new Worker(new Queue)
-  //     worker.start()
-  //     // expect(spy).to.have.been.called
-  //   })
-  // })
+    it('returns an object with sleep time', function() {
+      expect(worker.sleep).to.eq(options.sleep)
+    })
 
+    it('returns an object with max', function() {
+      expect(worker.max).to.eq(options.max)
+    })
 
-  // describe('start', function() {
-  //   it('should start an interval job', function() {
-  //     let spy = sinon.spy(global, 'setTimeout')
-  //     let worker = new Worker(queue)
+    context('given no sleep time', function() {
+      let worker = Worker.init(queue)
 
-  //     expect(spy).to.be.calledOnce
-  //   })
+      it('returns an object with default sleep time', function() {
+        expect(worker.sleep).to.eq(32)
+      })
+    })
 
-  //   it('should have default 50ms sleep time', function() {
-  //     let spy = sinon.spy(global, 'setTimeout')
-  //     let worker = new Worker(queue)
+    context('given no max', function() {
+      let worker = Worker.init(queue)
 
-  //     expect(spy).to.be.calledWith(
-  //       sinon.match.typeOf('function'),
-  //       50
-  //     )
-  //   })
+      it('returns an object with default max', function() {
+        expect(worker.max).to.eq(8)
+      })
+    })
+  })
 
-  //   context('when sleep is given as an options', function() {
-  //     it('should start the interval job with sleep time', function() {
-  //       let spy = sinon.spy(global, 'setTimeout')
-  //       let sleep = 100
-  //       let worker = new Worker(queue, { sleep })
+  describe('start', function() {
+    let job1 = Job.init(sinon.spy(), 1)
+    let job2 = Job.init(sinon.spy(), 1)
+    let queue = Queue.init()
+    let worker = Worker.init(queue)
+    beforeEach(function() {
+      Queue.add(queue, job1)
+      Queue.add(queue, job2)
+    })
 
-  //       expect(spy).to.be.calledWith(
-  //         sinon.match.typeOf('function'),
-  //         sleep
-  //       )
-  //     })
-  //   })
-  // })
+    it('polls and execute job from queue', function() {
+      let action = () => {
+        Worker.start(worker)
+        this.clock.tick(32)
+      }
+      expect(action).to.decrease(queue.q, 'size')
+      expect(job1.execute).to.have.been.calledOnce
+      expect(job2.execute).to.have.been.calledOnce
+    })
 
-  // describe('worker\'s behaviours', function() {
+    context('when bandwith is full', function() {
+      beforeEach(function() {
+        worker.pending = worker.max
+      })
 
-  //   // job action builder
-  //   let buildAction = function(action, delay = 0) {
-  //     return () => {
-  //       return new Promise((resolve, reject) => {
-  //         setTimeout(() => {
-  //           if (action) action(resolve, reject)
-  //         }, delay)
-  //       })
-  //     }
-  //   }
+      it('stops executing the job', function() {
+        let action = () => {
+          Worker.start(worker)
+          this.clock.tick(32)
+        }
+        expect(action).to.not.decrease(queue.q, 'size')
+      })
 
-  //   context('when queue is empty', function() {
-  //     it('should do nothing', function() {
-  //       let spy = sinon.spy(queue, 'get')
-  //       let worker = new Worker(queue)
+      it('clean up the queue', function() {
+        sinon.spy(queue.q, 'trim')
+        Worker.start(worker)
+        this.clock.tick(32)
+        expect(queue.q.trim).to.have.been.called
+      })
 
-  //       this.clock.tick(100)
-  //       expect(spy).to.be.not.called
-  //       Worker.stop(worker)
-  //     })
-  //   })
+      it('schedules another worker job after sleep time', function() {
+        spy(global, 'setTimeout', spy => {
+          Worker.start(worker)
+          expect(spy).to.have.been.calledWith(Worker.start, worker.sleep)
+        })
+      })
+    })
 
-  //   context('when queue is NOT empty', function() {
-  //     context('and the max has NOT being reached', function() {
-  //       it('should process jobs', function() {
-  //         let worker = new Worker(queue)
-  //         let run = sinon.spy(buildAction((res, rej) => res(true)))
-  //         let job = { run }
+    context('when queue is empty', function() {
+      let queue = Queue.init()
+      let worker = Worker.init(queue)
 
-  //         queue.add(job)
+      it('stops executing the job', function() {
+        sinon.spy(Queue, 'get')
 
-  //         this.clock.tick(50)
-  //         expect(run).to.be.calledOnce
-  //         Worker.stop(worker)
-  //       })
-  //     })
+        expect(Queue.isEmpty(queue)).to.eq(true)
+        Worker.start(worker)
+        expect(Queue.get).to.not.have.been.called
+      })
 
-  //     context('and the max has being reached', function() {
-  //       let worker = new Worker(queue)
+      it('clean up the queue', function() {
+        sinon.spy(Queue, 'cleanup')
 
-  //       it('should not trigger another job', function() {
-  //         let actions = new Array(8)
-  //           .fill(undefined)
-  //           .map((_, index) => index)
-  //           .map((i) => buildAction((res, rej) => null))
+        Worker.start(worker)
+        expect(Queue.cleanup).to.have.been.called
+      })
 
-  //         actions
-  //           .map(action => ({ run: action, priority: 1  }))
-  //           .forEach(job => queue.add(job))
+      it('schedules another worker job after sleep time', function() {
+        spy(global, 'setTimeout', spy => {
+          Worker.start(worker)
+          expect(spy).to.have.been.calledWith(Worker.start, worker.sleep)
+        })
+      })
+    })
+  })
 
-  //         let run = buildAction((res, rej) => res(true))
-  //         run = sinon.spy(run)
-  //         queue.add({ run, priority: 0 })
+  describe('stop', function() {
+    let queue = Queue.init()
+    let worker = Worker.init(queue)
+    beforeEach(function() {
+      worker = Worker.init(queue)
+    })
 
-  //         this.clock.tick(50)
-  //         expect(run).to.not.be.called
-  //       })
-  //     })
-  //   })
+    it('sets continue to false', function() {
+      expect(() => Worker.stop(worker)).to.change(worker, 'continue')
+      expect(worker.continue).to.eq(false)
+    })
 
-  // })
+    it('clears next scheduled worker job', function() {
+      Worker.start(worker)
+
+      expect(() => Worker.stop(worker)).to.change(worker, 'setTimeout')
+      expect(worker.setTimeout).to.not.exist
+    })
+  })
 })
