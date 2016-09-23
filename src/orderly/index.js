@@ -33,17 +33,15 @@ class Orderly {
   static start = function({ max, sleep } = {}) {
     if (!this.worker) {
       this.queue = Queue.init()
-      this.worker = new Worker(this.queue, { max, sleep })
+      this.worker = Worker.init(this.queue, { max, sleep })
       this.default = new Orderly()
     }
-
-    this.worker.start()
-
+    Worker.start(this.worker)
     return this.default
   }
 
   static pause = function() {
-    if (this.worker) this.worker.stop()
+    if (this.worker) Worker.stop(this.worker)
   }
 
   static stop = function() {
