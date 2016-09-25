@@ -5,6 +5,10 @@ function init(execute, priority = 0) {
   return { execute, priority }
 }
 
+function execute(job, ...args) {
+  return job.execute.apply(null, args)
+}
+
 function valid(job) {
   return typeof job === 'object' && typeof job.execute === 'function'
 }
@@ -13,4 +17,4 @@ function validates(job) {
   if (!valid(job)) throw new TypeError('Job must contain execute function')
 }
 
-export default { init, valid, validates }
+export default { init, execute, valid, validates }

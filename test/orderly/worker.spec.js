@@ -139,8 +139,8 @@ describe('Worker', function() {
     it('clears next scheduled worker job', function() {
       Worker.start(worker)
 
-      expect(() => Worker.stop(worker)).to.change(worker, 'setTimeout')
-      expect(worker.setTimeout).to.not.exist
+      expect(() => Worker.stop(worker)).to.change(worker, 'next')
+      expect(worker.next).to.not.exist
     })
   })
 })
