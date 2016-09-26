@@ -57,15 +57,14 @@ function discontinue(worker) {
 // ==============================================
 
 function init(queue, { sleep = 32, max = 8 } = {}) {
-  return { queue, sleep, max, pending: 0, continue: true }
+  return {
+    queue, sleep, max,
+    pending: 0,
+    continue: true
+  }
 }
 
-function start(worker) {
-  return pipe(worker, [poll, cleanup, sleep])
-}
-
-function stop(worker) {
-  return pipe(worker, [clearNext, discontinue])
-}
+let start = pipe(poll, cleanup, sleep)
+let stop = pipe(clearNext, discontinue)
 
 export default { init, start, stop }

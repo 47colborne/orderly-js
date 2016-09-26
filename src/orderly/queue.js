@@ -9,8 +9,8 @@ function defaultStrategy(
   return (p1 === p2 && qId2 > qId1) || (p2 < p1)
 }
 
-function inc(int) {
-  return int + 1
+function generateID(queue) {
+  return queue.counter += 1
 }
 
 function init() {
@@ -18,8 +18,7 @@ function init() {
 }
 
 function add(queue, job) {
-  Job.validates(job)
-  job.queueId = (queue.counter += 1)
+  job.queueId = generateID(queue)
   queue.q.add(job)
   return job
 }
