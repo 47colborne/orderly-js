@@ -1,8 +1,8 @@
 import { assert, expect, lib, sinon, spy } from '../test_helper'
 
-let Job = lib.src('orderly/job').default
-let Queue = lib.src('orderly/queue').default
-let Worker = lib.src('orderly/worker').default
+let Job = lib.src('orderly/job')
+let Queue = lib.src('orderly/queue')
+let Worker = lib.src('orderly/worker')
 
 describe('Worker', function() {
 
