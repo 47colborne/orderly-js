@@ -1,7 +1,7 @@
-import Queue from '../queue'
+import { trim } from '../queue'
 
 function cleanup(worker) {
-  Queue.cleanup(worker.queue)
+  trim(worker.queue)
   return worker
 }
 

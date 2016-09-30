@@ -1,8 +1,9 @@
 module.exports = {
   init: require('./init'),
   add: require('./add'),
-  cleanup: require('./cleanup'),
-  get: require('./get'),
+  getJob: require('./get_job'),
+  hasJob: require('./has_job'),
   isEmpty: require('./is_empty'),
-  size: require('./size')
+  size: require('./size'),
+  trim: require('./trim')
 }

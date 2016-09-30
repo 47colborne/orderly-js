@@ -2,14 +2,17 @@
 import chai, { assert, expect } from 'chai'
 import sinon from 'sinon'
 import sinonChail from 'sinon-chai'
+import { noPreserveCache } from 'proxyquire'
+
+let proxyquire = noPreserveCache()
 
 chai.use(sinonChail)
 
 // path helper functions
 import path, { join } from 'path'
 
-let lib = (p) => require(join(__dirname, '..', p))
-lib.src = (p) => lib(join('src', p))
+let lib = (p, o = {}) => proxyquire(join(__dirname, '..', p), o)
+lib.src = (p, o) => lib(join('src', p), o)
 
 // require and setup jsdom
 let jsdom = require('jsdom')

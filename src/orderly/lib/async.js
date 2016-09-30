@@ -1,5 +1,5 @@
-function async(callback, time, ...args) {
-  return setTimeout(callback, time, ...args)
+function async(fun, time, args = []) {
+  return setTimeout(fun, time, ...args)
 }
 
 module.exports = async

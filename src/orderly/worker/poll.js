@@ -1,36 +1,17 @@
-import Job from '../job'
-import Queue from '../queue'
-
-import { async, lessThan } from '../lib'
-
-function waitingJob(worker) {
-  return !Queue.isEmpty(worker.queue)
-}
-
-function enoughCapacity(worker) {
-  return lessThan(worker.pending, worker.max)
-}
-
-function retrieveJob(worker) {
-  return Queue.get(worker.queue)
-}
-
-function onNextJob(worker, action) {
-  while(enoughCapacity(worker) && waitingJob(worker)) {
-    action(retrieveJob(worker))
-  }
-}
-
-function increasePending(worker) {
-  worker.pending += 1
-  return function() { worker.pending -= 1 }
-}
+import { run } from '../job'
+import { hasJob, getJob } from '../queue'
+import available from './available'
+import execute from './execute'
+import increasePending from './increase_pending'
 
 function poll(worker) {
-  onNextJob(worker, function(job) {
+  let queue = worker.queue
+  while (available(worker) && hasJob(queue)) {
+    let job = getJob(queue)
     let decreasePending = increasePending(worker)
-    async(Job.run, 0, job, decreasePending)
-  })
+    execute([job, decreasePending])
+  }
+
   return worker
 }
 
