@@ -1,5 +1,5 @@
 import { equal, lessThan } from '../lib'
-import { id, priority } from './attribute'
+import { id, priority } from '../job'
 
 function fifoStrategy(x, y) {
   return equal(priority(x), priority(y)) && lessThan(id(x), id(y))

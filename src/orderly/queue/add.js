@@ -1,15 +1,9 @@
-function ensurePriority({ priority = 0 }) {
-  return priority
-}
-
-function generateID(queue) {
-  return queue.counter += 1
-}
+import { priority } from '../job'
+import generateID from './generate_id'
 
 function add(queue, job) {
-  job.priority = ensurePriority(job)
   job.queueId = generateID(queue)
-
+  job.priority = priority(job)
   queue.q.add(job)
   return job
 }
