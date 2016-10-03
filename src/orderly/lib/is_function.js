@@ -1,5 +1,4 @@
-function isFunction(arg) {
+export function isFunction(arg) {
   return typeof arg === 'function'
 }
 
-module.exports = isFunction

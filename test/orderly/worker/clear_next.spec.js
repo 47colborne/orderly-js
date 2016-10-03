@@ -1,6 +1,6 @@
-import { assert, expect, lib, sinon, spy } from '../../test_helper'
+import { assert, expect, sinon, spy, stub } from '../../test_helper'
 
-let clearNext = lib.src('orderly/worker/clear_next')
+let clearNext = stub('orderly/worker/clear_next')()
 
 describe('clearNext', function() {
   it('tries to clear next scheduled worker call', function() {
@@ -8,7 +8,7 @@ describe('clearNext', function() {
       let next = sinon.stub()
       let worker = { next }
       clearNext(worker)
-      expect(spy).to.have.been.calledWith(next)
+      expect(spy.withArgs(next)).called
     })
   })
 

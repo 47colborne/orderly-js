@@ -1,6 +1,6 @@
-import { assert, expect, lib, sinon, spy } from '../../test_helper'
+import { assert, expect, sinon, spy, stub } from '../../test_helper'
 
-let init = lib.src('orderly/worker/init')
+let init = stub('orderly/worker/init')()
 
 describe('init', function() {
   context('when queue is not give', function() {

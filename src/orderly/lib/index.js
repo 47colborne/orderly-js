@@ -1,9 +1,7 @@
-module.exports = {
-  async: require('./async'),
-  equal: require('./equal'),
-  exist: require('./exist'),
-  pipe: require('./pipe'),
-  isFunction: require('./is_function'),
-  isObject: require('./is_object'),
-  lessThan: require('./less_than')
-}
+export { asyncCall } from './async_call'
+export { equal } from './equal'
+export { exist } from './exist'
+export { pipe } from './pipe'
+export { isFunction } from './is_function'
+export { isObject } from './is_object'
+export { lessThan } from './less_than'

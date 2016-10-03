@@ -12,8 +12,7 @@ function buildPipe([ head, ...tail ], built = immediateReturn) {
   return head ? buildPipe(tail, nest(head, built)) : built
 }
 
-function pipe(...actions) {
+export function pipe(...actions) {
   return buildPipe(actions)
 }
 
-module.exports = pipe

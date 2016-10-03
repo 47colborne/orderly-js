@@ -1,4 +1,4 @@
-function init(queue, { sleep = 32, max = 8 } = {}) {
+export function init(queue, { sleep = 32, max = 8 } = {}) {
   if (!queue) throw new TypeError("Missing queue")
 
   return {
@@ -7,5 +7,3 @@ function init(queue, { sleep = 32, max = 8 } = {}) {
     continue: true
   }
 }
-
-module.exports = init

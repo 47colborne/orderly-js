@@ -1,8 +1,6 @@
-let async = require('../lib/async')
-let run = require('../job/run')
+import { asyncCall } from '../lib'
+import { run } from '../job'
 
-function execute(args = []) {
-  async(run, 0, args)
+export function execute(args = []) {
+  asyncCall(run, 0, args)
 }
-
-module.exports = execute

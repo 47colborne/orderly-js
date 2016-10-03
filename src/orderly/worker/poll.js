@@ -1,10 +1,10 @@
 import { run } from '../job'
 import { hasJob, getJob } from '../queue'
-import available from './available'
-import execute from './execute'
-import increasePending from './increase_pending'
+import { available } from './available'
+import { execute } from './execute'
+import { increasePending } from './increase_pending'
 
-function poll(worker) {
+export function poll(worker) {
   let queue = worker.queue
   while (available(worker) && hasJob(queue)) {
     let job = getJob(queue)
@@ -14,5 +14,3 @@ function poll(worker) {
 
   return worker
 }
-
-module.exports = poll

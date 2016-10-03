@@ -1,6 +1,6 @@
-import { assert, expect, lib, sinon, spy } from '../../test_helper'
+import { assert, expect, sinon, spy, stub } from '../../test_helper'
 
-let available = lib.src('orderly/worker/available')
+let available = stub('orderly/worker/available')()
 
 describe('available', function() {
   context('when pending jobs is less than max', function() {

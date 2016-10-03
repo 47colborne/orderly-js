@@ -1,5 +1,3 @@
-function equal(x, y) {
+export function equal(x, y) {
   return x === y
 }
-
-module.exports = equal

@@ -1,9 +1,7 @@
-import { async } from '../lib'
+import { asyncCall } from '../lib'
 
-function sleep(worker, next) {
+export function sleep(worker, next) {
   if (worker.continue)
-    worker.next = async(next, worker.sleep, [worker])
+    worker.next = asyncCall(next, worker.sleep, [worker])
   return worker
 }
-
-module.exports = sleep

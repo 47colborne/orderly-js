@@ -1,9 +1,7 @@
-module.exports = {
-  init: require('./init'),
-  add: require('./add'),
-  getJob: require('./get_job'),
-  hasJob: require('./has_job'),
-  isEmpty: require('./is_empty'),
-  size: require('./size'),
-  trim: require('./trim')
-}
+export { init } from './init'
+export { add } from './add'
+export { getJob } from './get_job'
+export { hasJob } from './has_job'
+export { isEmpty } from './is_empty'
+export { size } from './size'
+export { trim } from './trim'

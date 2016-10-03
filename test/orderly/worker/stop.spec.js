@@ -1,14 +1,9 @@
-import { assert, expect, lib, sinon, spy } from '../../test_helper'
+import { assert, expect, sinon, spy, stub } from '../../test_helper'
 
-function stubStop({
-  clearNext = (worker) => worker,
-  discontinue = (worker) => worker
-} = {}) {
-  return lib.src('/orderly/worker/stop', {
-    './clear_next': clearNext,
-    './discontinue': discontinue
-  })
-}
+let stubStop = stub('orderly/worker/stop', {
+  './clear_next': (worker) => worker,
+  './discontinue': (worker) => worker
+})
 
 describe('stop', function() {
   let worker = {}

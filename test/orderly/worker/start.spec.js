@@ -1,16 +1,10 @@
-import { assert, expect, lib, sinon, spy } from '../../test_helper'
+import { assert, expect, sinon, spy, stub } from '../../test_helper'
 
-function stubStart({
-  cleanup = (worker) => worker,
-  poll = (worker) => worker,
-  sleep = (worker) => worker
-} = {}) {
-  return lib.src('/orderly/worker/start', {
-    './cleanup': cleanup,
-    './poll': poll,
-    './sleep': sleep
-  })
-}
+let stubStart = stub('/orderly/worker/start', {
+  './cleanup': (worker) => worker,
+  './poll': (worker) => worker,
+  './sleep': (worker) => worker
+})
 
 describe('start', function() {
   let worker = {}

@@ -1,5 +1,3 @@
-function exist(obj) {
+export function exist(obj) {
   return obj != null
 }
-
-module.exports = exist

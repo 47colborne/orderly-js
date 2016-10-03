@@ -1,5 +1,3 @@
-function trim(queue) {
+export function trim(queue) {
   return queue.q.trim()
 }
-
-module.exports = trim

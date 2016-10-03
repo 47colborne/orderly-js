@@ -1,6 +1,6 @@
-import { assert, expect, lib, sinon, spy } from '../../test_helper'
+import { assert, expect, sinon, spy, stub } from '../../test_helper'
 
-let discontinue = lib.src('orderly/worker/discontinue')
+let discontinue = stub('orderly/worker/discontinue')()
 
 describe('discontinue', function() {
   it('toggles the continue to false', function() {

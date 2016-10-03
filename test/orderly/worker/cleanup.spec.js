@@ -1,22 +1,25 @@
-import { assert, expect, lib, sinon } from '../../test_helper'
+import { assert, expect, sinon, stub } from '../../test_helper'
 
-let stubQueue = {}
-
-let cleanup = lib.src('orderly/worker/cleanup', {
-  '../queue': stubQueue
+let stubCleanup = stub('orderly/worker/cleanup', {
+  '../queue': {
+    trim: (obj) => obj
+  }
 })
 
 describe('cleanup', function() {
   it('trims worker queue', function() {
+    let spy = sinon.spy()
+    let cleanup = stubCleanup({ queue: { trim: spy } })
+
     let queue = {}
     let worker = { queue }
 
-    stubQueue.trim = sinon.spy()
     cleanup(worker)
-    expect(stubQueue.trim).to.have.been.calledWith(queue)
+    expect(spy.withArgs(queue)).calledOnce
   })
 
   it('returns the worker', function() {
+    let cleanup = stubCleanup()
     let queue = {}
     let worker = { queue }
 

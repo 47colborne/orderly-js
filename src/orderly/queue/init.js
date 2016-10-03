@@ -1,11 +1,9 @@
 import FastPriorityQueue from 'fastpriorityqueue'
-import strategy from './strategy'
+import { sortStrategy } from './sort_strategy'
 
-function init() {
+export function init() {
   return {
-    q: new FastPriorityQueue(strategy),
+    q: new FastPriorityQueue(sortStrategy),
     counter: 0
   }
 }
-
-module.exports = init

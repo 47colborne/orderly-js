@@ -1,8 +1,6 @@
-import clearNext from './clear_next'
-import discontinue from './discontinue'
+import { clearNext } from './clear_next'
+import { discontinue } from './discontinue'
 
-function stop(worker) {
+export function stop(worker) {
   return discontinue(clearNext(worker))
 }
-
-module.exports = stop

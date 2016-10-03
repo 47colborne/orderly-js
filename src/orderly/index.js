@@ -1,9 +1,9 @@
 import { setMode } from './debug'
 
 import Ajax from './ajax'
-import Job from './job'
-import Queue from './queue'
-import Worker from './worker'
+import * as Job from './job'
+import * as Queue from './queue'
+import * as Worker from './worker'
 
 class Orderly {
 

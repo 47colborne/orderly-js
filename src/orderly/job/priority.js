@@ -1,5 +1,3 @@
-function priority({ priority = 0 }) {
+export function priority({ priority = 0 }) {
   return priority
 }
-
-module.exports = priority

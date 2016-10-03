@@ -1,7 +1,5 @@
 import { lessThan } from '../lib'
 
-function available(worker) {
+export function available(worker) {
   return lessThan(worker.pending, worker.max)
 }
-
-module.exports = available

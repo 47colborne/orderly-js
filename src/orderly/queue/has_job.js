@@ -1,7 +1,5 @@
-let isEmpty = require('./is_empty')
+import { isEmpty } from './is_empty'
 
-function hasJob(queue) {
+export function hasJob(queue) {
   return !isEmpty(queue)
 }
-
-module.exports = hasJob

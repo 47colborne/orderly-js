@@ -1,4 +1,4 @@
-import { assert, expect, lib, sinon, spy } from '../../test_helper'
+import { assert, expect, sinon, spy, stub } from '../../test_helper'
 
 function toggleBoolean(bool, times = 1) {
   let counter = 0
@@ -10,35 +10,30 @@ function toggleBoolean(bool, times = 1) {
   }
 }
 
-function stubPoll({
-  available = toggleBoolean(true),
-  execute = () => undefined,
-  hasJob = toggleBoolean(true),
-  getJob = () => {}
-} = {}) {
-  let options = {
-    './available': available,
-    './execute': execute,
-    '../queue': {
-      hasJob: hasJob,
-      getJob: getJob
-    }
+let stubPoll = stub('orderly/worker/poll', {
+  './available': () => true,
+  './execute': () => {},
+  '../queue': {
+    hasJob: () => true,
+    getJob: () => {}
   }
-
-  return lib.src('orderly/worker/poll', options)
-}
+})
 
 describe('poll', function() {
   let worker = { pending: 0 }
+  let poll = stubPoll({
+    available: toggleBoolean(true),
+    queue: { hasJob: toggleBoolean(true) }
+  })
 
   it('returns the worker', function() {
-    let poll = stubPoll()
     expect(poll(worker)).to.eq(worker)
   })
 
   context('when worker is busy', function() {
     let poll = stubPoll({
-      available: (worker) => false
+      available: toggleBoolean(false),
+      queue: { hasJob: toggleBoolean(true) }
     })
 
     it('skips the process', function() {
@@ -49,7 +44,8 @@ describe('poll', function() {
 
   context('when queue is empty', function() {
     let poll = stubPoll({
-      hasJob: toggleBoolean(false)
+      available: toggleBoolean(true),
+      queue: { hasJob: toggleBoolean(false) }
     })
 
     it('skips the process', function() {
@@ -61,7 +57,14 @@ describe('poll', function() {
   context('when queue has job and worker is available', function() {
     let job = {}
     let spy = sinon.spy()
-    let poll = stubPoll({ execute: spy, getJob: () => job })
+    let poll = stubPoll({
+      available: toggleBoolean(true),
+      execute: spy,
+      queue: {
+        hasJob: toggleBoolean(true),
+        getJob: () => job
+      }
+    })
 
     it('increases pending', function() {
       let action = () => poll(worker)

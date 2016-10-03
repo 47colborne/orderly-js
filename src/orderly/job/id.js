@@ -1,5 +1,4 @@
-function id({ queueId }) {
+export function id({ queueId }) {
   return queueId
 }
 
-module.exports = id

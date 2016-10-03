@@ -1,6 +1,4 @@
-module.exports = {
-  id: require('./id'),
-  init: require('./init'),
-  priority: require('./priority'),
-  run: require('./run')
-}
+export { id } from './id'
+export { init } from './init'
+export { priority } from './priority'
+export { run } from './run'

@@ -1,17 +1,17 @@
-import { assert, expect, lib, sinon, spy } from '../../test_helper'
+import { assert, expect, sinon, spy, stub } from '../../test_helper'
 
-function stubSleep({ async = () => {} } = {}) {
-  let options = { '../lib': { async } }
-  return lib.src('/orderly/worker/sleep', options)
-}
+let stubSleep = stub('/orderly/worker/sleep', {
+  '../lib': {
+    asyncCall: () => {}
+  }
+})
 
 describe('sleep', function() {
   let next = 'next'
   let time = 99
 
-  let sleep = stubSleep()
-
   it('returns the worker', function() {
+    let sleep = stubSleep()
     let worker = {}
     expect(sleep(worker)).to.eq(worker)
   })
@@ -20,7 +20,7 @@ describe('sleep', function() {
     let worker = { continue: true, sleep: time  }
     let returned = 'returned'
     let spy = sinon.stub().returns(returned)
-    let sleep = stubSleep({ async: spy })
+    let sleep = stubSleep({ lib: { asyncCall: spy } })
 
     it('schedules next worker job', function() {
       let args = [next, time, [worker]]
