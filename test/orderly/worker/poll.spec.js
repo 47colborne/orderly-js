@@ -11,29 +11,30 @@ function toggleBoolean(bool, times = 1) {
 }
 
 let stubPoll = stub('orderly/worker/poll', {
-  './available': () => true,
-  './execute': () => {},
-  '../queue': {
-    hasJob: () => true,
-    getJob: () => {}
-  }
+  available: './available',
+  execute: './execute',
+  hasJob: '../queue',
+  getJob: '../queue',
+  increasePending: './increase_pending'
 })
 
 describe('poll', function() {
   let worker = { pending: 0 }
   let poll = stubPoll({
-    available: toggleBoolean(true),
-    queue: { hasJob: toggleBoolean(true) }
-  })
+        available: toggleBoolean(true),
+        hasJob: toggleBoolean(true),
+        getJob: (o) => o
+      })
 
   it('returns the worker', function() {
+
     expect(poll(worker)).to.eq(worker)
   })
 
   context('when worker is busy', function() {
     let poll = stubPoll({
       available: toggleBoolean(false),
-      queue: { hasJob: toggleBoolean(true) }
+      hasJob: toggleBoolean(true)
     })
 
     it('skips the process', function() {
@@ -45,7 +46,7 @@ describe('poll', function() {
   context('when queue is empty', function() {
     let poll = stubPoll({
       available: toggleBoolean(true),
-      queue: { hasJob: toggleBoolean(false) }
+      hasJob: toggleBoolean(false)
     })
 
     it('skips the process', function() {
@@ -60,10 +61,8 @@ describe('poll', function() {
     let poll = stubPoll({
       available: toggleBoolean(true),
       execute: spy,
-      queue: {
-        hasJob: toggleBoolean(true),
-        getJob: () => job
-      }
+      hasJob: toggleBoolean(true),
+      getJob: (o) => job
     })
 
     it('increases pending', function() {

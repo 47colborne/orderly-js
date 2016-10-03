@@ -1,9 +1,7 @@
 import { assert, expect, sinon, spy, stub } from '../../test_helper'
 
 let stubSleep = stub('/orderly/worker/sleep', {
-  '../lib': {
-    asyncCall: () => {}
-  }
+  asyncCall: '../lib'
 })
 
 describe('sleep', function() {
@@ -20,7 +18,7 @@ describe('sleep', function() {
     let worker = { continue: true, sleep: time  }
     let returned = 'returned'
     let spy = sinon.stub().returns(returned)
-    let sleep = stubSleep({ lib: { asyncCall: spy } })
+    let sleep = stubSleep({ asyncCall: spy })
 
     it('schedules next worker job', function() {
       let args = [next, time, [worker]]
@@ -37,7 +35,7 @@ describe('sleep', function() {
   context('when worker is set to discontinue', function() {
     let worker = { continue: false  }
     let spy = sinon.stub()
-    let sleep = stubSleep({ async: spy })
+    let sleep = stubSleep({ asyncCall: spy })
 
     it('does not schedules next worker job', function() {
       sleep(worker, next)

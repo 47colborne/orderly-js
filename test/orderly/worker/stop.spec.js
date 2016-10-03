@@ -1,15 +1,15 @@
 import { assert, expect, sinon, spy, stub } from '../../test_helper'
 
 let stubStop = stub('orderly/worker/stop', {
-  './clear_next': (worker) => worker,
-  './discontinue': (worker) => worker
+  clearNext: './clear_next',
+  discontinue: './discontinue'
 })
 
 describe('stop', function() {
   let worker = {}
 
   it('clears next scheduled worker job', function() {
-    let spy = sinon.spy()
+    let spy = sinon.stub().returns(worker)
     let stop = stubStop({ clearNext: spy })
     stop(worker)
     expect(spy.withArgs(worker)).calledOnce

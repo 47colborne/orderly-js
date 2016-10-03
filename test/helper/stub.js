@@ -1,6 +1,6 @@
 import { src } from './path'
 
-function filename(filePath) {
+function extractFilename(filePath) {
   return filePath.split('/').pop()
 }
 
@@ -17,43 +17,27 @@ function keys(object) {
   return Object.keys(object)
 }
 
-function reduce(object, callback, init = {}) {
+function reduce(object, callback, init) {
   return keys(object).reduce(function(sum, key) {
     return callback(sum, key, object[key])
   }, init)
 }
 
-function subMerge(defaultMap = {}, customMap = {}) {
-  return reduce(defaultMap, function(map, key, val) {
-    let name = camelize(filename(key))
-    return { ...map,
-      [key]: customMap[name] || defaultMap[key]
+function merge(definition = {}, stubs = {}) {
+  return reduce(definition, function(map, name, path) {
+    let filename = camelize(extractFilename(path))
+    let stub = stubs[name]
+    if (stub) {
+      map[path] = { ...map[path], [name]: stub }
     }
-  })
+    return map
+  }, {})
 }
 
-function sub(key, value) {
-  return { [key]: value }
-}
-
-function merge(defaultMap = {}, customMap = {}) {
-  return reduce(defaultMap, function(map, key, val) {
-    let name = camelize(filename(key))
-    return { ...map,
-      [key]: (
-        typeof val === 'object' ?
-        subMerge(val, customMap[name]) :
-        sub(name, customMap[name] || val)
-      )
-    }
-  })
-}
-
-function stub(filePath, defaultMap = {}) {
-  let name = camelize(filename(filePath))
-  return function(customMap = {}) {
-    let stub = merge(defaultMap, customMap)
-    return src(filePath, stub)[name]
+function stub(filePath, definition = {}) {
+  let name = camelize(extractFilename(filePath))
+  return function(stubs = {}) {
+    return src(filePath, merge(definition, stubs))[name]
   }
 }
 

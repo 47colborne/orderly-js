@@ -1,9 +1,9 @@
 import { assert, expect, sinon, spy, stub } from '../../test_helper'
 
 let stubStart = stub('/orderly/worker/start', {
-  './cleanup': (worker) => worker,
-  './poll': (worker) => worker,
-  './sleep': (worker) => worker
+  cleanup: './cleanup',
+  poll: './poll',
+  sleep: './sleep'
 })
 
 describe('start', function() {
@@ -11,7 +11,11 @@ describe('start', function() {
 
   it('polls', function() {
     let spy = sinon.spy()
-    let start = stubStart({ poll: spy })
+    let start = stubStart({
+      cleanup: o => o,
+      sleep: o => o,
+      poll: spy
+    })
 
     start(worker)
     expect(spy.withArgs(worker)).calledOnce
@@ -19,7 +23,11 @@ describe('start', function() {
 
   it('cleans up after poll', function() {
     let spy = sinon.spy()
-    let start = stubStart({ cleanup: spy })
+    let start = stubStart({
+      poll: o => o,
+      sleep: o => o,
+      cleanup: spy
+    })
 
     start(worker)
     expect(spy.withArgs(worker)).calledOnce
@@ -27,7 +35,11 @@ describe('start', function() {
 
   it('sleeps after clean up', function() {
     let spy = sinon.spy()
-    let start = stubStart({ sleep: spy })
+    let start = stubStart({
+      cleanup: o => o,
+      poll: o => o,
+      sleep: spy
+    })
 
     start(worker)
     expect(spy.withArgs(worker)).calledOnce
