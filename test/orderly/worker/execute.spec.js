@@ -1,6 +1,6 @@
-import { assert, expect, sinon, stub } from '../../test_helper'
+import { assert, expect, sinon, es6Require } from '../../test_helper'
 
-let stubExecute = stub('orderly/worker/execute', {
+let stubExecute = es6Require('orderly/worker/execute', {
   asyncCall: '../lib',
   run: '../job'
 })

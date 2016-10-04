@@ -1,6 +1,6 @@
-import { assert, expect, sinon, stub } from '../../test_helper'
+import { assert, expect, sinon, es6Require } from '../../test_helper'
 
-let stubCleanup = stub('orderly/worker/cleanup', {
+let stubCleanup = es6Require('orderly/worker/cleanup', {
   trim: '../queue'
 })
 

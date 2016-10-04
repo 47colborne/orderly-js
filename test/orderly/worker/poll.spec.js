@@ -1,4 +1,4 @@
-import { assert, expect, sinon, spy, stub } from '../../test_helper'
+import { assert, expect, sinon, spy, es6Require } from '../../test_helper'
 
 function toggleBoolean(bool, times = 1) {
   let counter = 0
@@ -10,7 +10,7 @@ function toggleBoolean(bool, times = 1) {
   }
 }
 
-let stubPoll = stub('orderly/worker/poll', {
+let stubPoll = es6Require('orderly/worker/poll', {
   available: './available',
   execute: './execute',
   hasJob: '../queue',

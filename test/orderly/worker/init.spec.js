@@ -1,6 +1,6 @@
-import { assert, expect, sinon, spy, stub } from '../../test_helper'
+import { assert, expect, sinon, spy, es6Require } from '../../test_helper'
 
-let init = stub('orderly/worker/init')()
+let init = es6Require('orderly/worker/init')()
 
 describe('init', function() {
   context('when queue is not give', function() {

@@ -1,6 +1,6 @@
-import { assert, expect, sinon, spy, stub } from '../../test_helper'
+import { assert, expect, sinon, spy, es6Require } from '../../test_helper'
 
-let stubStop = stub('orderly/worker/stop', {
+let stubStop = es6Require('orderly/worker/stop', {
   clearNext: './clear_next',
   discontinue: './discontinue'
 })

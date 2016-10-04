@@ -8,7 +8,7 @@ chai.use(sinonChail)
 // require helpers
 import * as path from './helper/path'
 import { spy } from './helper/spy'
-import { stub } from './helper/stub'
+import { es6Require } from './helper/es6_require'
 
 // require and setup jsdom
 let jsdom = require('jsdom')
@@ -22,4 +22,4 @@ global.navigator = { userAgent: 'node.js' }
 let fetch = require('node-fetch')
 global.fetch = fetch
 
-export { assert, expect, sinon, path, spy, stub }
+export { assert, expect, sinon, path, spy, es6Require }

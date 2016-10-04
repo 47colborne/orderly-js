@@ -1,6 +1,6 @@
-import { assert, expect, sinon, spy, stub } from '../../test_helper'
+import { assert, expect, sinon, spy, es6Require } from '../../test_helper'
 
-let discontinue = stub('orderly/worker/discontinue')()
+let discontinue = es6Require('orderly/worker/discontinue')()
 
 describe('discontinue', function() {
   it('toggles the continue to false', function() {

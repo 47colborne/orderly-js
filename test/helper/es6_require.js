@@ -1,6 +1,6 @@
 import { src } from './path'
 
-function extractFilename(filePath) {
+function filename(filePath) {
   return filePath.split('/').pop()
 }
 
@@ -23,22 +23,21 @@ function reduce(object, callback, init) {
   }, init)
 }
 
-function merge(definition = {}, stubs = {}) {
+function build(definition = {}, stubs = {}) {
   return reduce(definition, function(map, name, path) {
-    let filename = camelize(extractFilename(path))
     let stub = stubs[name]
-    if (stub) {
+    if (stub != null)
       map[path] = { ...map[path], [name]: stub }
-    }
+
     return map
   }, {})
 }
 
-function stub(filePath, definition = {}) {
-  let name = camelize(extractFilename(filePath))
+function es6Require(path, map = {}) {
+  let exportName = camelize(filename(path))
   return function(stubs = {}) {
-    return src(filePath, merge(definition, stubs))[name]
+    return src(path, build(map, stubs))[exportName]
   }
 }
 
-export { stub }
+export { es6Require }

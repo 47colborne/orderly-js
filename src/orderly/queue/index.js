@@ -1,5 +1,5 @@
 export { init } from './init'
-export { add } from './add'
+export { addJob } from './add_job'
 export { getJob } from './get_job'
 export { hasJob } from './has_job'
 export { isEmpty } from './is_empty'
