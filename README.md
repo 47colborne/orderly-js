@@ -12,27 +12,27 @@ Orderly-js prioritize multiple ajax requests in a single page.
 
 ##Getting Started
 ####.start
-**.stop**
+####..stop
 
 ##Configuration
-###create
-###from
+####create
+####from
 
 ##Callbacks
-###.beforeEach(function())
-###.afterEach(callback)
+####.beforeEach(function())
+####.afterEach(callback)
 
 ##Make request
-###.ajax(url, options = {})
-###.get(url, options = {})
-###.post(url, options = {})
-###.put(url, options = {})
-###.del(url, options = {})
+####.ajax(url, options = {})
+####.get(url, options = {})
+####.post(url, options = {})
+####.put(url, options = {})
+####.del(url, options = {})
 
 ##Request Functions
-###.success(callback)
-###.fail(callback) 
-###.then(callback)
-###.catch(callback)
-###.abort(callback) 
-###.abortWhen(callback)
+####.success(callback)
+####.fail(callback) 
+####.then(callback)
+####.catch(callback)
+####.abort(callback) 
+####.abortWhen(callback)
