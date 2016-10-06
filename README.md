@@ -11,8 +11,8 @@ Orderly-js prioritize multiple ajax requests in a single page.
 ##Load the library
 
 ##Getting Started
-###.start
-###.stop
+####.start
+**.stop
 
 ##Configuration
 ###create
