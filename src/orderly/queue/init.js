@@ -1,9 +1,8 @@
 import FastPriorityQueue from 'fastpriorityqueue'
-import { sortStrategy } from './sort_strategy'
+import { compare } from './compare'
 
 export function init() {
-  return {
-    q: new FastPriorityQueue(sortStrategy),
-    counter: 0
-  }
+  let q = new FastPriorityQueue(compare)
+  let counter = 0
+  return { q, counter }
 }
