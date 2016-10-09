@@ -1,6 +1,6 @@
 import { assert, expect, sinon, spy, es6Require } from '../../test_helper'
 
-let clearNext = es6Require('orderly/worker/clear_next')()
+let clearNext = es6Require('orderly/worker/clearNext')()
 
 describe('clearNext', function() {
   it('tries to clear next scheduled worker call', function() {

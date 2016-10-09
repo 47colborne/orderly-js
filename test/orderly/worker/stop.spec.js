@@ -1,7 +1,7 @@
 import { assert, expect, sinon, spy, es6Require } from '../../test_helper'
 
 let stubStop = es6Require('orderly/worker/stop', {
-  clearNext: './clear_next',
+  clearNext: './clearNext',
   discontinue: './discontinue'
 })
 

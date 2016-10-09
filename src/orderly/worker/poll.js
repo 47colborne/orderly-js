@@ -1,8 +1,7 @@
-import { run } from '../job'
 import { hasJob, getJob } from '../queue'
 import { available } from './available'
 import { execute } from './execute'
-import { increasePending } from './increase_pending'
+import { increasePending } from './increasePending'
 
 export function poll(worker) {
   let queue = worker.queue

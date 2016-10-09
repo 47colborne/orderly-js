@@ -1,11 +1,12 @@
 import { assert, expect, sinon, spy, es6Require } from '../../test_helper'
 
-let requireHasJob = es6Require('orderly/queue/has_job', {
-  isEmpty: './is_empty'
+let requireHasJob = es6Require('orderly/queue/hasJob', {
+  isEmpty: './isEmpty'
 })
 
 describe('hasJob', function() {
   let queue = {}
+
   context('given a queue with job', function() {
     let isEmpty = () => false
     let hasJob = requireHasJob({ isEmpty })

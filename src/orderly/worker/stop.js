@@ -1,4 +1,4 @@
-import { clearNext } from './clear_next'
+import { clearNext } from './clearNext'
 import { discontinue } from './discontinue'
 
 export function stop(worker) {

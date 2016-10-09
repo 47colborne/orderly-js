@@ -1,4 +1,4 @@
-import { isEmpty } from './is_empty'
+import { isEmpty } from './isEmpty'
 
 export function hasJob(queue) {
   return !isEmpty(queue)

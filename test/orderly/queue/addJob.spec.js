@@ -1,6 +1,6 @@
 import { assert, expect, sinon, spy, es6Require } from '../../test_helper'
 
-let requireAddJob = es6Require('orderly/queue/add_job')
+let requireAddJob = es6Require('orderly/queue/addJob')
 
 describe('addJob', function() {
   let addJob = requireAddJob()
@@ -12,23 +12,6 @@ describe('addJob', function() {
 
     queue = addJob(queue, job)
     expect(spy.withArgs(sinon.match(job))).calledOnce
-  })
-
-  it('generates an id for job', function() {
-    let spy = sinon.spy()
-    let job = {}
-    let queue = { q: { add: spy }, counter: 0 }
-
-    queue = addJob(queue, job)
-    expect(job.queueId).to.eq(1)
-  })
-
-  it('ensures priority in job is default to 0', function() {
-    let job = {}
-    let queue = { q: { add: o => o }, counter: 0 }
-
-    queue = addJob(queue, job)
-    expect(job.priority).to.eq(0)
   })
 
   it('returns the queue', function() {

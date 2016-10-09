@@ -17,9 +17,4 @@ describe('init', function() {
     let { q: { compare } } = init()
     expect(compare).eq(compare)
   })
-
-  it('returns a new queue with counter default to 0', function() {
-    let { counter } = init()
-    expect(counter).eq(0)
-  })
 })

@@ -8,16 +8,16 @@ describe('comapre', function() {
   context('when priorities are the same', function() {
     context('and x.id is less than y.id', function() {
       it('returns true to indicate items are ordered', function() {
-        let x = { priority: 0, queueId: 1 }
-        let y = { priority: 0, queueId: 2 }
+        let x = { priority: 0, id: 1 }
+        let y = { priority: 0, id: 2 }
 
         expect(compare(x, y)).eq(true)
       })
     })
     context('and x.id is greater or equal to y.id', function() {
       it('returns false to indicate items are not ordered', function() {
-        let x = { priority: 0, queueId: 2 }
-        let y = { priority: 0, queueId: 1 }
+        let x = { priority: 0, id: 2 }
+        let y = { priority: 0, id: 1 }
 
         expect(compare(x, y)).eq(false)
       })

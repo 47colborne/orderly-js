@@ -1,4 +1,4 @@
-export function id({ queueId }) {
-  return queueId
+export function id({ id }) {
+  return id
 }
 

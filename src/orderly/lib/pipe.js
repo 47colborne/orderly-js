@@ -1,4 +1,4 @@
-import { isFunction } from './is_function'
+import { isFunction } from './isFunction'
 
 export function pipe(fn, ...args) {
   let result = isFunction(fn) ? fn.apply(null, args) : fn

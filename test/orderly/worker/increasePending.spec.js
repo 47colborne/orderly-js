@@ -1,6 +1,6 @@
 import { assert, expect, sinon, spy, es6Require } from '../../test_helper'
 
-let increasePending = es6Require('orderly/worker/increase_pending')()
+let increasePending = es6Require('orderly/worker/increasePending')()
 
 describe('increasePending', function() {
   context('when pending is undefined', function() {

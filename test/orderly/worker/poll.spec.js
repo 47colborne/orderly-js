@@ -15,7 +15,7 @@ let stubPoll = es6Require('orderly/worker/poll', {
   execute: './execute',
   hasJob: '../queue',
   getJob: '../queue',
-  increasePending: './increase_pending'
+  increasePending: './increasePending'
 })
 
 describe('poll', function() {

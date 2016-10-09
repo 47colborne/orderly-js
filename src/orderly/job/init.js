@@ -1,9 +1,8 @@
 import { isFunction } from '../lib'
-import { missingExecute } from './error/missing_execute'
+import { initCounter } from './initCounter'
+
+let ticker = initCounter()
 
 export function init(execute, priority = 0) {
-  if (!isFunction(execute))
-    throw missingExecute
-
-  return { execute, priority }
+  return { execute, priority, id: ticker() }
 }

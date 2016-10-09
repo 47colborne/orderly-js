@@ -1,6 +1,6 @@
 import { assert, expect, sinon, spy, es6Require } from '../../test_helper'
 
-let requireIsEmpty = es6Require('orderly/queue/is_empty')
+let requireIsEmpty = es6Require('orderly/queue/isEmpty')
 
 describe('isEmpty', function() {
   let isEmpty = requireIsEmpty()
