@@ -1,52 +1,64 @@
-'use strict'
+// ====================================
+// Import Dependencies
+// ====================================
+const { join } = require("path")
+const webpack = require("webpack")
 
-let path = require('path')
-let webpack = require('webpack')
+const Path = (...path) => {
+  return join(__dirname, ...path)
+}
 
-const PATH = (p) => path.join(__dirname, p || '')
+// ====================================
+// Configuration
+// ====================================
 
-const CONFIG = {
-  context: PATH('src'),
-  entry: {
-    orderly: ['./index.js']
-  },
-  output: {
-    filename: 'index.js',
-    path: PATH('dist'),
-    library: 'Orderly',
-    libraryTarget: 'umd',
-    umdNamedDefine: true
-  },
-  module: {
-    loaders: [{
-      test: /\.js$/,
-      loader: 'babel',
-      includes: ['src'],
-      excludes: ['node_modules']
-    }, {
-      test: /\.css$/,
-      loaders: ['style', 'css']
-    }]
-  },
-  devtool: 'cheap-module-source-map',
-  resolve: {
-    extensions: ['', '.js'],
-    modulesDirectories: ["node_modules"]
+module.exports = function(env) {
+
+  // ====================================
+  // Common Configuration
+  // ====================================
+  let config = {
+    context: Path("src"),
+    entry: {
+      orderly: ["./index.js"]
+    },
+    output: {
+      filename: "index.js",
+      path: Path("dist"),
+      library: "Orderly",
+      libraryTarget: "var"
+    },
+    module: {
+      rules: [{
+        test: /\.js$/,
+        use: [{
+          loader: "babel-loader",
+        }],
+        exclude: /node_modules/
+      }]
+    },
+    devtool: "cheap-module-source-map",
+    resolve: {
+      extensions: [".js"],
+      modules: [Path("src"), "node_modules"]
+    }
   }
-}
 
-if (process.env.NODE_ENV === 'compile') {
-  CONFIG.plugins = [
-    new webpack.optimize.DedupePlugin(),
-    new webpack.optimize.UglifyJsPlugin({
-      comments: false,
-      compress: { warnings: false },
-      mangle: {
-        screw_ie8: true,
-        keep_fnames: true
-      }
-    })
-  ]
-}
+  // ====================================
+  // Production Configuration
+  // ====================================
 
-module.exports = CONFIG
+  if (env == "production") {
+    config.plugins = [
+      new webpack.optimize.UglifyJsPlugin({
+        comments: false,
+        compress: {
+          warnings: false,
+          drop_console: false
+        }
+      })
+    ]
+  }
+
+  return config
+}
