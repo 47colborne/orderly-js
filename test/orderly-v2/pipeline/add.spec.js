@@ -1,6 +1,6 @@
 import { assert, expect, lib, sinon } from "../../test_helper"
 
-import add from "../../../src/orderly-v2/pipeline/add"
+import add from "../../../src/orderly-v2/Pipeline/add"
 
 describe("add", function() {
   context("with no queue", function() {

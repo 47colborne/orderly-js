@@ -1,6 +1,6 @@
 import { assert, expect, lib, sinon } from "../../test_helper"
 
-import get from "../../../src/orderly-v2/pipeline/get"
+import get from "../../../src/orderly-v2/Pipeline/get"
 import Queue from "../../../src/orderly-v2/Queue"
 
 describe("get", function() {

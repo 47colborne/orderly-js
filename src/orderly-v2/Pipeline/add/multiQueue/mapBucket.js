@@ -1,4 +1,4 @@
-import { truthy } from "../../helpers/boolean"
+import { truthy } from "../../../helpers/boolean"
 
 const mapBucket = ({ bucket = truthy, add }) => {
   return task => {

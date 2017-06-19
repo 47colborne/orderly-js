@@ -1,6 +1,6 @@
-import mapBuckets from "./mapBuckets"
+import { falsy } from "../../../helpers/boolean"
 
-import { falsy } from "../../helpers/boolean"
+import mapBuckets from "./mapBuckets"
 
 const multiQueue = (queues) => {
   const mapper = queues.reduce(mapBuckets, falsy)
