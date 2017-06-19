@@ -1,4 +1,4 @@
-import { falsy } from "../../../helpers/boolean"
+import { falsy } from "../../../helpers/function"
 
 import mapBuckets from "./mapBuckets"
 
