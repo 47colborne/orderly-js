@@ -38,7 +38,7 @@ describe("get", function() {
       assert.isFunction(getter)
     })
 
-    it("calls the get on the queues based on the weighting", function() {
+    it("scenario 1: Queues are not empty", function() {
 
       // ==============================
       // configure 3 seperate queues
@@ -81,6 +81,20 @@ describe("get", function() {
       // ==============================
       const result = Array(12).fill(undefined).map(getter)
 
+      const weight = result.reduce((weight, i) => {
+        return {...weight,
+          [i]: (weight[i] || 0) + 1,
+          t: weight.t + 1
+        }
+      }, {t: 0})
+
+      // ==============================
+      // test the weights on the result
+      // ==============================
+      assert.closeTo(stub1.callCount / 12, 2/6, 0.1)
+      assert.closeTo(stub2.callCount / 12, 3/6, 0.1)
+      assert.closeTo(stub3.callCount / 12, 1/6, 0.1)
+
       // ==============================
       // tests on the number of times
       // the stubs gets called
@@ -102,7 +116,10 @@ describe("get", function() {
       ])
     })
 
-    it("selects the queue based on the queues size", function() {
+    it(`scenario 2:
+      queue1.empty always return [...F]
+      queue2.empty returns [F, T, T]
+      queue3.empty returns [F, T, F]`, function() {
 
       // ==============================
       // configure 3 seperate queues
@@ -155,6 +172,13 @@ describe("get", function() {
       const result = Array(20).fill(undefined).map(getter)
 
       // ==============================
+      // test the weights on the result
+      // ==============================
+      assert.closeTo(stub1.callCount / 20, 2/6, 0.1)
+      assert.closeTo(stub2.callCount / 20, 3/6, 0.1)
+      assert.closeTo(stub3.callCount / 20, 1/6, 0.1)
+
+      // ==============================
       // test the order of returned values
       // ==============================
 
@@ -169,6 +193,72 @@ describe("get", function() {
         1, 1,
         3,
         2, 2, 2
+      ])
+    })
+
+    it(`scenario 3:
+      queue1.empty returns [F, T, F, T]
+      queue2.empty returns [...F]`, function() {
+
+      // ==============================
+      // configure 3 seperate queues
+      // stub(id) always returns it's id
+      // and stub3 is ALWAYS EMPTY
+      // ==============================
+      const stub1 = sinon.stub().returns(1)
+      const empty1 = sinon.stub().returns(false)
+      empty1
+        .onCall(0).returns(false)
+        .onCall(1).returns(true)
+        .onCall(2).returns(false)
+        .onCall(3).returns(true)
+        .onCall(4).returns(true)
+
+      const queue1 = Queue.create({
+        get: stub1,
+        weight: 4,
+        empty: empty1
+      })
+
+      const stub2 = sinon.stub().returns(2)
+      const empty2 = sinon.stub().returns(false)
+      const queue2 = Queue.create({
+        get: stub2,
+        weight: 1,
+        empty: empty2
+      })
+
+      // ==============================
+      // calls get to obtain getter
+      // ==============================
+      const getter = get([queue1, queue2])
+
+      // ==============================
+      // iterates over 12 times
+      // expects the results to iterate
+      // throught the pipeline twice
+      // ==============================
+      const result = Array(20).fill(undefined).map(getter)
+
+      // ==============================
+      // test the weights on the result
+      // ==============================
+      assert.closeTo(stub1.callCount / 20, 0.8, 0.1)
+      assert.closeTo(stub2.callCount / 20, 0.2, 0.1)
+
+      // ==============================
+      // test the order of returned values
+      // ==============================
+      assert.deepEqual(result, [
+        1,
+        2,
+        1,
+        2,
+        1, 1, 1, 1, 1, 1,
+        2,
+        1, 1, 1, 1,
+        2,
+        1, 1, 1, 1
       ])
     })
   })
