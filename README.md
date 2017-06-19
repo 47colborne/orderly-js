@@ -1,38 +1,20 @@
-#Orderly-js
-A simple Javascript utility library that prioritize ajax requests using fetch.
+// Ideals
 
-#Description
-Orderly-js prioritize multiple ajax requests in a single page.
+Orderly.init("api")
+  .map(task => {
 
-#Installation
-`$ npm install orderly-js`
+  })
 
-#Usage
-##Load the library
 
-##Getting Started
-####.start
-####..stop
+let task = Orderly.api(task => {
+  $.get("http://www.example.com/api/search?q=wonder+woman", task.resolve)
+  .fail(task.reject)
+})
 
-##Configuration
-####create
-####from
+task.cancel()
 
-##Callbacks
-####.beforeEach(function())
-####.afterEach(callback)
-
-##Make request
-####.ajax(url, options = {})
-####.get(url, options = {})
-####.post(url, options = {})
-####.put(url, options = {})
-####.del(url, options = {})
-
-##Request Functions
-####.success(callback)
-####.fail(callback) 
-####.then(callback)
-####.catch(callback)
-####.abort(callback) 
-####.abortWhen(callback)
+task
+  .then(parse)
+  .then()
+  .catch()
+  .cancelIf(task => this.unmounted)

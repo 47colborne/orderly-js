@@ -1,11 +1,11 @@
 import { truthy } from "../../helpers/boolean"
 
-const mapBucket = ({ bucket = truthy, heap }) => {
+const mapBucket = ({ bucket = truthy, add }) => {
   return task => {
     let fallInBucket = bucket(task)
 
     if (fallInBucket)
-      heap.add(task)
+      add(task)
 
     return fallInBucket
   }

@@ -1,5 +1,5 @@
 const simpleQueue = ([queue]) => {
-  return (...tasks) => tasks.map(queue.add)
+  return queue.get
 }
 
 export default simpleQueue
